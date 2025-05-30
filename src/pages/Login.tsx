@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { HeartPlus } from "lucide-react";
 import { LoginForm } from "@/components/login-form";
-import { SignupForm } from "@/components/signup-form";
 
 export default function LoginPage() {
   const [isSignup, setIsSignup] = useState(false);
@@ -32,11 +31,7 @@ export default function LoginPage() {
 
         {/* Form Container */}
         <div className="w-full bg-white/90 backdrop-blur-md rounded-lg shadow-xl p-8">
-          {isSignup ? (
-            <SignupForm onSwitchToLogin={() => setIsSignup(false)} />
-          ) : (
-            <LoginForm onSwitchToSignup={() => setIsSignup(true)} />
-          )}
+          <LoginForm onSwitchToSignup={() => setIsSignup(true)} />
         </div>
       </div>
     </div>

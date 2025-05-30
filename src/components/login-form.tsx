@@ -51,17 +51,7 @@ export function LoginForm({ className, onSwitchToSignup, ...props }: LoginFormPr
         <Button type="submit" className="w-full bg-red-600 hover:bg-red-700">
           Login
         </Button>       
-      </div>
-      <div className="text-center text-sm">
-        Don't have an account?{" "}
-        <button
-          type="button"
-          onClick={onSwitchToSignup}
-          className="underline underline-offset-4 hover:text-red-600"
-        >
-          Sign up
-        </button>
-      </div>
+      </div>    
     </form>
   );
 }
