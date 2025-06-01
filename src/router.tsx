@@ -1,21 +1,34 @@
 import { createBrowserRouter } from 'react-router-dom'
 import StaffLayout from '@/layouts/StaffLayout' // Main layout for staff pages
-import StaffDashboard from '@/pages/staff/dashboard/page' // Example staff page
 import LoginPage from '@/pages/Login' // Login page
+import { SignedOut, RedirectToSignIn, SignedIn } from "@clerk/clerk-react"
+import BloodStock from '@/pages/staff/dashboard/BloodStock'
+import EmergencyRequest from './pages/staff/EmergencyRequest'
 
 export const router = createBrowserRouter([
   {
     path: '/',
-    element: <StaffLayout />,
+    element: (
+      <>
+          <StaffLayout />
+        {/* <SignedOut>
+          <RedirectToSignIn />
+        </SignedOut> */}
+      </>
+    ),
     children: [
       {
         index: true,
-        element: <StaffDashboard />
-      }
+        element: <EmergencyRequest />
+      },
+      {
+        path: 'bloodstock',
+        element: <BloodStock />
+      },
     ]
   },
   {
     path: '/login',
     element: <LoginPage />
   }
-]) 
+])

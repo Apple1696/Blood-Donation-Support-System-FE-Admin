@@ -1,69 +1,61 @@
 "use client"
 
 import * as React from "react"
+import { Link } from "react-router-dom"
 import {
-  ArrowUpCircleIcon,
-  BarChartIcon,
   CameraIcon,
-  ClipboardListIcon,
-  DatabaseIcon,
+  Newspaper,
+  Warehouse,
+  Cross,
   FileCodeIcon,
-  FileIcon,
   FileTextIcon,
-  FolderIcon,
-  HelpCircleIcon,
-  LayoutDashboardIcon,
-  ListIcon,
-  SearchIcon,
-  SettingsIcon,
+  Hospital,
   UsersIcon,
 } from "lucide-react"
-
-import { NavDocuments } from "@/components/nav-documents"
-import { NavMain } from "@/components/nav-main"
-import { NavSecondary } from "@/components/nav-secondary"
-import { NavUser } from "@/components/nav-user"
 import {
   Sidebar,
   SidebarContent,
-  SidebarFooter,
   SidebarHeader,
+  SidebarFooter,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
 
+// Assuming NavUser is a component you have defined elsewhere
+import { NavUser } from "@/components/nav-user"
+
 const data = {
-  user: {
-    name: "shadcn",
-    email: "m@example.com",
-    avatar: "/avatars/shadcn.jpg",
-  },
   navMain: [
     {
-      title: "Dashboard",
-      url: "#",
-      icon: LayoutDashboardIcon,
+      title: "Emergency Requests",
+      url: "/",
+      icon: Hospital,
     },
     {
-      title: "Lifecycle",
+      title: "Donations",
       url: "#",
-      icon: ListIcon,
+      icon: Cross,
     },
     {
-      title: "Analytics",
-      url: "#",
-      icon: BarChartIcon,
-    },
-    {
-      title: "Projects",
-      url: "#",
-      icon: FolderIcon,
-    },
-    {
-      title: "Team",
+      title: "Donors Register",
       url: "#",
       icon: UsersIcon,
+    },
+    {
+      title: "Recipient Register",
+      url: "#",
+      icon: UsersIcon,
+    },
+    {
+      title: "Blood Stock",
+      url: "/bloodstock",
+      icon: Warehouse,
+    },
+    {
+      title: "Blog List",
+      url: "#",
+      icon: Newspaper,
     },
   ],
   navClouds: [
@@ -71,83 +63,67 @@ const data = {
       title: "Capture",
       icon: CameraIcon,
       isActive: true,
-      url: "#",
+      url: "/capture",
       items: [
         {
           title: "Active Proposals",
-          url: "#",
+          url: "/capture/active-proposals",
         },
         {
           title: "Archived",
-          url: "#",
+          url: "/capture/archived",
         },
       ],
     },
     {
       title: "Proposal",
       icon: FileTextIcon,
-      url: "#",
+      url: "/proposal",
       items: [
         {
           title: "Active Proposals",
-          url: "#",
+          url: "/proposal/active-proposals",
         },
         {
           title: "Archived",
-          url: "#",
+          url: "/proposal/archived",
         },
       ],
     },
     {
       title: "Prompts",
       icon: FileCodeIcon,
-      url: "#",
+      url: "/prompts",
       items: [
         {
           title: "Active Proposals",
-          url: "#",
+          url: "/prompts/active-proposals",
         },
         {
           title: "Archived",
-          url: "#",
+          url: "/prompts/archived",
         },
       ],
     },
   ],
-  navSecondary: [
-    {
-      title: "Settings",
-      url: "#",
-      icon: SettingsIcon,
-    },
-    {
-      title: "Get Help",
-      url: "#",
-      icon: HelpCircleIcon,
-    },
-    {
-      title: "Search",
-      url: "#",
-      icon: SearchIcon,
-    },
-  ],
-  documents: [
-    {
-      name: "Data Library",
-      url: "#",
-      icon: DatabaseIcon,
-    },
-    {
-      name: "Reports",
-      url: "#",
-      icon: ClipboardListIcon,
-    },
-    {
-      name: "Word Assistant",
-      url: "#",
-      icon: FileIcon,
-    },
-  ],
+}
+
+// New NavMain component to handle navigation
+function NavMain({ items }: { items: typeof data.navMain }) {
+  return (
+    <SidebarMenu>
+      {items.map((item) => (
+        <SidebarMenuItem key={item.title}>
+          <SidebarMenuButton asChild tooltip={item.title}>
+            <Link to={item.url} className="flex items-center gap-2">
+              <item.icon />
+              <span>{item.title}</span>
+            </Link>
+          </SidebarMenuButton>
+        </SidebarMenuItem>
+      ))}
+    </SidebarMenu>
+  )
 }
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
@@ -160,21 +136,19 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               asChild
               className="data-[slot=sidebar-menu-button]:!p-1.5"
             >
-              <a href="#">
-                <ArrowUpCircleIcon className="h-5 w-5" />
-                <span className="text-base font-semibold">Acme Inc.</span>
-              </a>
+              <Link to="/" className="flex items-center space-x-2">
+                <Cross className="h-5 w-5 text-red-500" />
+                <span className="text-base font-semibold">BloodLink</span>
+              </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
         <NavMain items={data.navMain} />
-        <NavDocuments items={data.documents} />
-        <NavSecondary items={data.navSecondary} className="mt-auto" />
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={data.user} />
+        <NavUser />
       </SidebarFooter>
     </Sidebar>
   )

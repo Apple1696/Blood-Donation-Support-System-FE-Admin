@@ -1,6 +1,8 @@
 "use client";
 
 import type React from "react";
+import { useSignIn } from "@clerk/clerk-react";
+import { useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,10 +13,32 @@ interface LoginFormProps extends React.ComponentPropsWithoutRef<"form"> {
 }
 
 export function LoginForm({ className, onSwitchToSignup, ...props }: LoginFormProps) {
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const { isLoaded, signIn, setActive } = useSignIn();
+  const navigate = useNavigate();
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    console.log("Login form submitted");
-    // Handle login logic here
+    if (!isLoaded) return;
+
+    const formData = new FormData(e.currentTarget);
+    const email = formData.get("email") as string;
+    const password = formData.get("password") as string;
+
+    try {
+      const signInAttempt = await signIn.create({
+        identifier: email,
+        password,
+      });
+
+      if (signInAttempt.status === "complete") {
+        await setActive({ session: signInAttempt.createdSessionId });
+        navigate("/"); // Redirect to dashboard
+      } else {
+        console.error("Login failed:", signInAttempt);
+      }
+    } catch (err) {
+      console.error("Error during login:", err);
+    }
   };
 
   return (
@@ -31,6 +55,7 @@ export function LoginForm({ className, onSwitchToSignup, ...props }: LoginFormPr
           <Label htmlFor="email">Email</Label>
           <Input
             id="email"
+            name="email"
             type="email"
             placeholder="abc@gmail.com"
             required
@@ -43,12 +68,13 @@ export function LoginForm({ className, onSwitchToSignup, ...props }: LoginFormPr
           </div>
           <Input
             id="password"
+            name="password"
             type="password"
             required
             className="border-gray-300 focus:border-red-600"
           />
         </div>
-        <Button type="submit" className="w-full bg-red-600 hover:bg-red-700">
+        <Button type="submit" className="w-full bg-red-600 hover:bg-red-700" disabled={!isLoaded}>
           Login
         </Button>       
       </div>    
