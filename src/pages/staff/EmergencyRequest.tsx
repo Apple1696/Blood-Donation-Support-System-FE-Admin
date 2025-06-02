@@ -1,4 +1,3 @@
-// app/(routes)/emergency-request/page.tsx
 "use client"
 
 import React from "react"

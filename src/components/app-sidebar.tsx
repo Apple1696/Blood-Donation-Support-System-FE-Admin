@@ -34,7 +34,7 @@ const data = {
     },
     {
       title: "Donations",
-      url: "#",
+      url: "/donation",
       icon: Cross,
     },
     {
