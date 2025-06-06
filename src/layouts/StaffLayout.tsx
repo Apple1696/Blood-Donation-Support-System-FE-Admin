@@ -1,6 +1,6 @@
 import { Outlet } from 'react-router-dom'
-import { AppSidebar } from '@/components/app-sidebar' 
-import { SiteHeader } from '@/components/site-header' 
+import { AppSidebar } from '@/components/sidebar/app-sidebar' 
+import { SiteHeader } from '@/components/sidebar/site-header' 
 import { SidebarProvider, SidebarInset } from '@/components/ui/sidebar'
 
 export default function StaffLayout() {

@@ -5,22 +5,29 @@ import { SignedOut, RedirectToSignIn, SignedIn } from "@clerk/clerk-react"
 import BloodStock from '@/pages/staff/dashboard/BloodStock'
 import EmergencyRequest from './pages/staff/EmergencyRequest'
 import Donation from './pages/staff/Donation'
+import CampaignList from './pages/staff/CampaignList'
 
 export const router = createBrowserRouter([
   {
     path: '/',
     element: (
       <>
+        <SignedIn>
           <StaffLayout />
-        {/* <SignedOut>
+        </SignedIn>
+        <SignedOut>
           <RedirectToSignIn />
-        </SignedOut> */}
+        </SignedOut>
       </>
     ),
     children: [
       {
         index: true,
         element: <EmergencyRequest />
+      },
+      {
+        path: 'campaign',
+        element: <CampaignList />
       },
       {
         path: 'bloodstock',

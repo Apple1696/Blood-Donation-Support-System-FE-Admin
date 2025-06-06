@@ -5,7 +5,7 @@ import { HeartPlus } from "lucide-react";
 import { LoginForm } from "@/components/login-form";
 
 export default function LoginPage() {
-  const [isSignup, setIsSignup] = useState(false);
+  const [, setIsSignup] = useState(false);
 
   return (
     <div className="relative min-h-screen flex items-center justify-center">

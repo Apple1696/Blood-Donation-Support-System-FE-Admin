@@ -7,6 +7,7 @@ import {
   Newspaper,
   Warehouse,
   Cross,
+  FlagTriangleRight,
   FileCodeIcon,
   FileTextIcon,
   Hospital,
@@ -23,7 +24,7 @@ import {
 } from "@/components/ui/sidebar"
 
 // Assuming NavUser is a component you have defined elsewhere
-import { NavUser } from "@/components/nav-user"
+import { NavUser } from "@/components/sidebar/nav-user"
 
 const data = {
   navMain: [
@@ -36,6 +37,11 @@ const data = {
       title: "Donations",
       url: "/donation",
       icon: Cross,
+    },
+    {
+      title: "Campaign",
+      url: "/campaign",
+      icon: FlagTriangleRight ,
     },
     {
       title: "Donors Register",

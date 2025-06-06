@@ -23,6 +23,7 @@ import {
   ChevronsLeftIcon,
   ChevronsRightIcon,
   MoreVerticalIcon,
+  PlusIcon,
 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -41,51 +42,42 @@ import {
   TableRow,
 } from "@/components/ui/table"
 
-interface Donation {
-  id: string
-  campaign_id: string
-  donor_id: string
-  current_status: string
-  result_id: string
-  created_at: string
-  updated_at: string
-}
-
-const columns: ColumnDef<Donation>[] = [
+const columns: ColumnDef<BloodUnit>[] = [
   {
     accessorKey: "id",
     header: "ID",
   },
   {
-    accessorKey: "campaign_id",
-    header: "Campaign ID",
+    accessorKey: "blood_group_id",
+    header: "Blood Group",
   },
   {
-    accessorKey: "donor_id",
-    header: "Donor ID",
+    accessorKey: "member_id",
+    header: "Member ID",
   },
   {
-    accessorKey: "current_status",
+    accessorKey: "status_id",
     header: "Status",
   },
   {
-    accessorKey: "result_id",
-    header: "Result ID",
+    accessorKey: "blood_volume",
+    header: "Blood Volume",
+    cell: ({ row }) => `${row.getValue("blood_volume")} ml`,
   },
   {
-    accessorKey: "created_at",
-    header: "Created At",
-    cell: ({ row }) => new Date(row.getValue("created_at")).toLocaleDateString(),
+    accessorKey: "remaining_volume",
+    header: "Remaining Volume",
+    cell: ({ row }) => `${row.getValue("remaining_volume")} ml`,
   },
   {
-    accessorKey: "updated_at",
-    header: "Updated At",
-    cell: ({ row }) => new Date(row.getValue("updated_at")).toLocaleDateString(),
+    accessorKey: "expired_date",
+    header: "Expiry Date",
+    cell: ({ row }) => new Date(row.getValue("expired_date")).toLocaleDateString(),
   },
   {
     id: "actions",
     header: "Actions",
-    cell: ({ row }) => (
+    cell: ({ }) => (
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" className="h-8 w-8 p-0">
@@ -94,15 +86,26 @@ const columns: ColumnDef<Donation>[] = [
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
-          <DropdownMenuItem onClick={() => alert(`View details for Result ID: ${row.getValue("result_id")}`)}>View Details</DropdownMenuItem>
-          <DropdownMenuItem onClick={() => alert(`Update status for ID: ${row.getValue("id")}`)}>Update Status</DropdownMenuItem>
+          <DropdownMenuItem>Edit</DropdownMenuItem>
+          <DropdownMenuItem>Transfer</DropdownMenuItem>
+          <DropdownMenuItem>Discard</DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
     ),
   },
 ]
 
-export function DonationTable() {
+interface BloodUnit {
+  id: string
+  blood_group_id: string
+  member_id: string
+  status_id: string
+  blood_volume: number
+  remaining_volume: number
+  expired_date: string
+}
+
+export function BloodUnitTable({ data }: { data: BloodUnit[] }) {
   const [sorting, setSorting] = React.useState<SortingState>([])
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
@@ -110,36 +113,6 @@ export function DonationTable() {
     pageIndex: 0,
     pageSize: 10,
   })
-
-  const data: Donation[] = [
-    {
-      id: "D001",
-      campaign_id: "C001",
-      donor_id: "DN001",
-      current_status: "Pending",
-      result_id: "R001",
-      created_at: "2025-05-01T10:00:00Z",
-      updated_at: "2025-05-02T12:00:00Z"
-    },
-    {
-      id: "D002",
-      campaign_id: "C002",
-      donor_id: "DN002",
-      current_status: "Approved",
-      result_id: "R002",
-      created_at: "2025-05-03T14:00:00Z",
-      updated_at: "2025-05-04T16:00:00Z"
-    },
-    {
-      id: "D003",
-      campaign_id: "C001",
-      donor_id: "DN003",
-      current_status: "Completed",
-      result_id: "R003",
-      created_at: "2025-05-05T09:00:00Z",
-      updated_at: "2025-05-06T11:00:00Z"
-    }
-  ]
 
   const table = useReactTable({
     data,
@@ -166,7 +139,11 @@ export function DonationTable() {
   return (
     <div className="w-full p-4">
       <div className="flex justify-between items-center mb-4">
-        <h1 className="text-2xl font-bold">Donation Request Management</h1>
+        <h1 className="text-2xl font-bold">Blood Unit Storage</h1>
+        <Button>
+          <PlusIcon className="h-4 w-4 mr-2" />
+          Create New
+        </Button>
       </div>
       <div className="rounded-md border">
         <Table>
@@ -202,7 +179,7 @@ export function DonationTable() {
             ) : (
               <TableRow>
                 <TableCell colSpan={columns.length} className="h-24 text-center">
-                  No donation requests found.
+                  No blood units found.
                 </TableCell>
               </TableRow>
             )}

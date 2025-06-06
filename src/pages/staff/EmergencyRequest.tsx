@@ -1,7 +1,5 @@
 "use client"
 
-import React from "react"
-
 export default function EmergencyRequest() {
   return (
     <div className="p-6">

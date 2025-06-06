@@ -1,25 +1,13 @@
 "use client"
 
 import * as React from "react"
-import {
-  MouseSensor,
-  useSensor,
-  useSensors,
-  type DragEndEvent,
-} from "@dnd-kit/core"
-import {
-  SortableContext,
-  verticalListSortingStrategy,
-} from "@dnd-kit/sortable"
+import { useNavigate } from "react-router-dom"
 import {
   type ColumnDef,
-  type ColumnFiltersState,
-  type Row,
   type SortingState,
   type VisibilityState,
   flexRender,
   getCoreRowModel,
-  getFilteredRowModel,
   getPaginationRowModel,
   getSortedRowModel,
   useReactTable,
@@ -31,8 +19,11 @@ import {
   ChevronsRightIcon,
   MoreVerticalIcon,
   PlusIcon,
+  EyeIcon,
+  TrashIcon,
 } from "lucide-react"
-
+import { Toaster } from "@/components/ui/sonner"
+import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -48,43 +39,91 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
+import campaignService from "../services/campaign"
 
-const columns: ColumnDef<BloodUnit>[] = [
+interface Campaign {
+  id: string
+  name: string
+  description?: string
+  startDate: string
+  endDate?: string
+  status: string
+  banner: string
+}
+
+const columns: ColumnDef<Campaign>[] = [
   {
     accessorKey: "id",
     header: "ID",
   },
   {
-    accessorKey: "blood_group_id",
-    header: "Blood Group",
+    accessorKey: "name",
+    header: "Name",
   },
   {
-    accessorKey: "member_id",
-    header: "Member ID",
+    accessorKey: "description",
+    header: "Description",
   },
   {
-    accessorKey: "status_id",
+    accessorKey: "startDate",
+    header: "Start Date",
+    cell: ({ row }) => new Date(row.getValue("startDate")).toLocaleDateString(),
+  },
+  {
+    accessorKey: "endDate",
+    header: "End Date",
+    cell: ({ row }) => row.getValue("endDate") ? new Date(row.getValue("endDate")).toLocaleDateString() : "N/A",
+  },
+  {
+    accessorKey: "status",
     header: "Status",
   },
   {
-    accessorKey: "blood_volume",
-    header: "Blood Volume",
-    cell: ({ row }) => `${row.getValue("blood_volume")} ml`,
-  },
-  {
-    accessorKey: "remaining_volume",
-    header: "Remaining Volume",
-    cell: ({ row }) => `${row.getValue("remaining_volume")} ml`,
-  },
-  {
-    accessorKey: "expired_date",
-    header: "Expiry Date",
-    cell: ({ row }) => new Date(row.getValue("expired_date")).toLocaleDateString(),
+    accessorKey: "banner",
+    header: "Banner",
+    cell: ({ row }) => (
+      <a href={row.getValue("banner")} target="_blank" rel="noopener noreferrer">
+        View Banner
+      </a>
+    ),
   },
   {
     id: "actions",
     header: "Actions",
-    cell: ({ row }) => (
+    cell: ({ row }) => <CampaignActions campaign={row.original} />,
+  },
+]
+
+interface CampaignTableProps {
+  data: Campaign[]
+}
+
+function CampaignActions({ campaign }: { campaign: Campaign }) {
+  const navigate = useNavigate()
+  const [showDeleteDialog, setShowDeleteDialog] = React.useState(false)
+
+  const handleDelete = async () => {
+    try {
+      await campaignService.deleteCampaign(campaign.id)
+      toast.success("Campaign deleted successfully")
+      window.location.reload()
+    } catch (error) {
+      toast.error("Failed to delete campaign")
+    }
+  }
+
+  return (
+    <>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" className="h-8 w-8 p-0">
@@ -93,28 +132,36 @@ const columns: ColumnDef<BloodUnit>[] = [
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
-          <DropdownMenuItem>Edit</DropdownMenuItem>
-          <DropdownMenuItem>Transfer</DropdownMenuItem>
-          <DropdownMenuItem>Discard</DropdownMenuItem>
+          <DropdownMenuItem onClick={() => navigate(`/campaigns/${campaign.id}`)}>
+            <EyeIcon className="h-4 w-4 mr-2" />
+            View Details
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => setShowDeleteDialog(true)}>
+            <TrashIcon className="h-4 w-4 mr-2" />
+            Delete
+          </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
-    ),
-  },
-]
-
-interface BloodUnit {
-  id: string
-  blood_group_id: string
-  member_id: string
-  status_id: string
-  blood_volume: number
-  remaining_volume: number
-  expired_date: string
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete the campaign "{campaign.name}".
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete}>Delete</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
+  )
 }
 
-export function BloodUnitTable({ data }: { data: BloodUnit[] }) {
+export function CampaignTable({ data }: CampaignTableProps) {
   const [sorting, setSorting] = React.useState<SortingState>([])
-  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
   const [pagination, setPagination] = React.useState({
     pageIndex: 0,
@@ -126,35 +173,23 @@ export function BloodUnitTable({ data }: { data: BloodUnit[] }) {
     columns,
     state: {
       sorting,
-      columnFilters,
       columnVisibility,
       pagination,
     },
     onSortingChange: setSorting,
-    onColumnFiltersChange: setColumnFilters,
     onColumnVisibilityChange: setColumnVisibility,
     onPaginationChange: setPagination,
     getCoreRowModel: getCoreRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getRowId: (row) => row.id,
   })
 
-  const sensors = useSensors(useSensor(MouseSensor, {}))
-
-  function handleDragEnd(event: DragEndEvent) {
-    const { active, over } = event
-    if (active && over && active.id !== over.id) {
-      // Handle reordering if needed
-    }
-  }
-
   return (
     <div className="w-full p-4">
       <div className="flex justify-between items-center mb-4">
-        <h1 className="text-2xl font-bold">Blood Unit Storage</h1>
-        <Button>
+        <h1 className="text-2xl font-bold">Campaign Management</h1>
+        <Button onClick={() => window.location.href = "/campaigns/new"}>
           <PlusIcon className="h-4 w-4 mr-2" />
           Create New
         </Button>
@@ -176,24 +211,19 @@ export function BloodUnitTable({ data }: { data: BloodUnit[] }) {
           </TableHeader>
           <TableBody>
             {table.getRowModel().rows?.length ? (
-              <SortableContext
-                items={table.getRowModel().rows.map((row) => row.id)}
-                strategy={verticalListSortingStrategy}
-              >
-                {table.getRowModel().rows.map((row) => (
-                  <TableRow key={row.id}>
-                    {row.getVisibleCells().map((cell) => (
-                      <TableCell key={cell.id}>
-                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                ))}
-              </SortableContext>
+              table.getRowModel().rows.map((row) => (
+                <TableRow key={row.id}>
+                  {row.getVisibleCells().map((cell) => (
+                    <TableCell key={cell.id}>
+                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))
             ) : (
               <TableRow>
                 <TableCell colSpan={columns.length} className="h-24 text-center">
-                  No blood units found.
+                  No campaigns found.
                 </TableCell>
               </TableRow>
             )}
@@ -240,6 +270,7 @@ export function BloodUnitTable({ data }: { data: BloodUnit[] }) {
           </Button>
         </div>
       </div>
+      <Toaster />
     </div>
   )
 }

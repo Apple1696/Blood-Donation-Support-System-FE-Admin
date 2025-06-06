@@ -1,4 +1,4 @@
-import { BloodUnitTable } from "@/components/data-table"
+import { BloodUnitTable } from "@/components/dashboard/data-table"
 
 import data from "./data.json"
 

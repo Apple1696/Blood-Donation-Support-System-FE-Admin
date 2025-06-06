@@ -1,8 +1,6 @@
 "use client"
 
 import {
-  BellIcon,
-  CreditCardIcon,
   LogOutIcon,
   MoreVerticalIcon,
   UserCircleIcon,
@@ -42,12 +40,12 @@ export function NavUser() {
   }
 
   const handleSignOut = async () => {
-    await signOut();
-    navigate("/login"); // Redirect to login page after signing out
+    await signOut({ redirectUrl: '/login' }); // Redirect to /login after signing out
+    navigate("/login"); // Ensure client-side navigation to /login
   };
 
   const handleViewAccount = () => {
-    navigate("/account"); // Redirect to account page (you'll need to create this route)
+    navigate("/account"); // Redirect to account page
   };
 
   return (
@@ -101,14 +99,6 @@ export function NavUser() {
               <DropdownMenuItem onClick={handleViewAccount}>
                 <UserCircleIcon className="mr-2 h-4 w-4" />
                 Account
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <CreditCardIcon className="mr-2 h-4 w-4" />
-                Billing
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <BellIcon className="mr-2 h-4 w-4" />
-                Notifications
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
