@@ -44,8 +44,8 @@ export function NavUser() {
     navigate("/login"); // Ensure client-side navigation to /login
   };
 
-  const handleViewAccount = () => {
-    navigate("/account"); // Redirect to account page
+  const handleViewProfile = () => {
+    navigate("/staffprofile"); // Redirect to staff profile page
   };
 
   return (
@@ -96,9 +96,9 @@ export function NavUser() {
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem onClick={handleViewAccount}>
+              <DropdownMenuItem onClick={handleViewProfile}>
                 <UserCircleIcon className="mr-2 h-4 w-4" />
-                Account
+                Profile
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />

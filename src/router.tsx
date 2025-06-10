@@ -6,6 +6,7 @@ import BloodStock from '@/pages/staff/dashboard/BloodStock'
 import EmergencyRequest from './pages/staff/EmergencyRequest'
 import Donation from './pages/staff/Donation'
 import CampaignList from './pages/staff/CampaignList'
+import StaffProfile from './pages/staff/StaffProfile'
 
 export const router = createBrowserRouter([
   {
@@ -27,7 +28,7 @@ export const router = createBrowserRouter([
       },
       {
         path: 'campaign',
-        element: <CampaignList />
+        element: <CampaignList/>
       },
       {
         path: 'bloodstock',
@@ -36,6 +37,10 @@ export const router = createBrowserRouter([
       {
         path: 'donation',
         element: <Donation />
+      },
+      {
+        path: 'staffprofile',
+        element: <StaffProfile />
       },
     ]
   },
