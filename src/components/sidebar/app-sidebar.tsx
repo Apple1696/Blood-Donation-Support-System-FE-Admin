@@ -45,12 +45,12 @@ const data = {
     },
     {
       title: "Donors Register",
-      url: "#",
+      url: "/donorregister",
       icon: UsersIcon,
     },
     {
       title: "Recipient Register",
-      url: "#",
+      url: "/recipientregister",
       icon: UsersIcon,
     },
     {
@@ -60,7 +60,7 @@ const data = {
     },
     {
       title: "Blog List",
-      url: "#",
+      url: "/bloglist",
       icon: Newspaper,
     },
   ],
