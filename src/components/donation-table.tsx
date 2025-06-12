@@ -40,15 +40,31 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+import DonationService from "@/services/donations"
+import ViewDonationDialog from "@/components/dialog/ViewDonationDialog"
+import UpdateStatusDialog from "@/components/dialog/UpdateStatusDialog"
+
+interface Donor {
+  id: string
+  firstName: string
+  lastName: string
+}
+
+interface Campaign {
+  id: string
+  name: string
+}
 
 interface Donation {
   id: string
-  campaign_id: string
-  donor_id: string
-  current_status: string
-  result_id: string
-  created_at: string
-  updated_at: string
+  donor: Donor
+  campaign: Campaign
+  amount: number
+  note: string
+  appointmentDate: string
+  currentStatus: string
+  createdAt: string
+  updatedAt: string
 }
 
 const columns: ColumnDef<Donation>[] = [
@@ -57,48 +73,71 @@ const columns: ColumnDef<Donation>[] = [
     header: "ID",
   },
   {
-    accessorKey: "campaign_id",
+    accessorKey: "campaign.id",
     header: "Campaign ID",
+    cell: ({ row }) => row.original.campaign.id,
   },
   {
-    accessorKey: "donor_id",
+    accessorKey: "donor.id",
     header: "Donor ID",
+    cell: ({ row }) => row.original.donor.id,
   },
   {
-    accessorKey: "current_status",
+    accessorKey: "currentStatus",
     header: "Status",
   },
   {
-    accessorKey: "result_id",
-    header: "Result ID",
+    accessorKey: "note",
+    header: "Result ID", // Note: 'result_id' is not in DonationRequest, using 'note' as a placeholder
+    cell: ({ row }) => row.original.note || "N/A",
   },
   {
-    accessorKey: "created_at",
+    accessorKey: "createdAt",
     header: "Created At",
-    cell: ({ row }) => new Date(row.getValue("created_at")).toLocaleDateString(),
+    cell: ({ row }) => new Date(row.getValue("createdAt")).toLocaleDateString(),
   },
   {
-    accessorKey: "updated_at",
+    accessorKey: "updatedAt",
     header: "Updated At",
-    cell: ({ row }) => new Date(row.getValue("updated_at")).toLocaleDateString(),
+    cell: ({ row }) => new Date(row.getValue("updatedAt")).toLocaleDateString(),
   },
   {
     id: "actions",
     header: "Actions",
-    cell: ({ row }) => (
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="ghost" className="h-8 w-8 p-0">
-            <MoreVerticalIcon className="h-4 w-4" />
-            <span className="sr-only">Open menu</span>
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
-          <DropdownMenuItem onClick={() => alert(`View details for Result ID: ${row.getValue("result_id")}`)}>View Details</DropdownMenuItem>
-          <DropdownMenuItem onClick={() => alert(`Update status for ID: ${row.getValue("id")}`)}>Update Status</DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
-    ),
+    cell: ({ row }) => {
+      const [openView, setOpenView] = React.useState(false)
+      const [openUpdate, setOpenUpdate] = React.useState(false)
+      return (
+        <>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" className="h-8 w-8 p-0">
+                <MoreVerticalIcon className="h-4 w-4" />
+                <span className="sr-only">Open menu</span>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => setOpenView(true)}>
+                View Details
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setOpenUpdate(true)}>
+                Update Status
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+          <ViewDonationDialog
+            open={openView}
+            onOpenChange={setOpenView}
+            donationId={row.original.id}
+          />
+          <UpdateStatusDialog
+            open={openUpdate}
+            onOpenChange={setOpenUpdate}
+            donationId={row.original.id}
+          />
+        </>
+      )
+    },
   },
 ]
 
@@ -110,36 +149,22 @@ export function DonationTable() {
     pageIndex: 0,
     pageSize: 10,
   })
+  const [data, setData] = React.useState<Donation[]>([])
+  const [loading, setLoading] = React.useState(true)
 
-  const data: Donation[] = [
-    {
-      id: "D001",
-      campaign_id: "C001",
-      donor_id: "DN001",
-      current_status: "Pending",
-      result_id: "R001",
-      created_at: "2025-05-01T10:00:00Z",
-      updated_at: "2025-05-02T12:00:00Z"
-    },
-    {
-      id: "D002",
-      campaign_id: "C002",
-      donor_id: "DN002",
-      current_status: "Approved",
-      result_id: "R002",
-      created_at: "2025-05-03T14:00:00Z",
-      updated_at: "2025-05-04T16:00:00Z"
-    },
-    {
-      id: "D003",
-      campaign_id: "C001",
-      donor_id: "DN003",
-      current_status: "Completed",
-      result_id: "R003",
-      created_at: "2025-05-05T09:00:00Z",
-      updated_at: "2025-05-06T11:00:00Z"
+  React.useEffect(() => {
+    async function fetchData() {
+      try {
+        const result = await DonationService.getDonationRequests()
+        setData(result.data)
+      } catch (error) {
+        console.error("Failed to fetch donation requests:", error)
+      } finally {
+        setLoading(false)
+      }
     }
-  ]
+    fetchData()
+  }, [])
 
   const table = useReactTable({
     data,
@@ -161,7 +186,7 @@ export function DonationTable() {
     getRowId: (row) => row.id,
   })
 
-
+  if (loading) return <div>Loading...</div>
 
   return (
     <div className="w-full p-4">
