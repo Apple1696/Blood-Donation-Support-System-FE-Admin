@@ -45,7 +45,7 @@ export function NavUser() {
   };
 
   const handleViewProfile = () => {
-    navigate("/staffprofile"); // Redirect to staff profile page
+    navigate("/adminprofile"); // Redirect to staff profile page
   };
 
   return (

@@ -1,29 +1,40 @@
-interface StaffProfile {
+import api from "@/config/api"; // axios instance đã cấu hình sẵn
+
+export interface AdminProfile {
   firstName: string;
   lastName: string;
   role: string;
 }
 
-class ProfileService {
-  private baseUrl: string = 'https://api-dev.bloodlink.site';
-
-  async getCurrentStaffProfile(): Promise<StaffProfile> {
-    const response = await fetch(`${this.baseUrl}/staffs/me`, {
-      method: 'GET',
-    });
-    return response.json();
-  }
-
-  async updateCurrentStaffProfile(profile: Partial<StaffProfile>): Promise<any> {
-    const response = await fetch(`${this.baseUrl}/staffs/me`, {
-      method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(profile),
-    });
-    return response.json();
-  }
+interface ApiResponse<T> {
+  success: boolean;
+  message: string;
+  data: T;
 }
 
-export default new ProfileService();
+export const ProfileService = {
+  getProfile: async (): Promise<AdminProfile> => {
+    try {
+      const response = await api.get<ApiResponse<AdminProfile>>('/admins/me');
+      if (response.data.success) {
+        return response.data.data;
+      }
+      throw new Error(response.data.message || 'Failed to fetch profile');
+    } catch (error) {
+      console.error('Error fetching profile:', error);
+      throw error;
+    }
+  },
+
+  updateProfile: async (profile: Partial<AdminProfile>): Promise<void> => {
+    try {
+      const response = await api.patch<ApiResponse<AdminProfile>>('/admins/me', profile);
+      if (!response.data.success) {
+        throw new Error(response.data.message || 'Failed to update profile');
+      }
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      throw error;
+    }
+  }
+};

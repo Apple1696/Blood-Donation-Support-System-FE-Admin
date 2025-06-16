@@ -21,7 +21,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { toast } from "sonner"
-import campaignService from "../../services/campaign"
+import { useUpdateCampaign } from "../../services/campaign"
 
 const formSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -56,15 +56,13 @@ export function EditCampaignDialog({ open, onOpenChange, campaign }: EditCampaig
     },
   })
 
+  const updateMutation = useUpdateCampaign()
+
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
-      await campaignService.updateCampaign(campaign.id, {
-        ...values,
-        status: "active",
-      })
+      await updateMutation.mutateAsync({ id: campaign.id, payload: { ...values, status: "active" } })
       toast.success("Campaign updated successfully")
       onOpenChange(false)
-      window.location.reload()
     } catch (error) {
       toast.error("Failed to update campaign")
     }

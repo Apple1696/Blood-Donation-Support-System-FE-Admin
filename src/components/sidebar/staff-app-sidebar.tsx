@@ -4,11 +4,12 @@ import * as React from "react"
 import { Link } from "react-router-dom"
 import {
   CameraIcon,
+  Newspaper,
+  Warehouse,
   Cross,
-  FlagTriangleRight,
   FileCodeIcon,
   FileTextIcon,
-  ChartColumnStacked ,
+  Hospital,
   UsersIcon,
 } from "lucide-react"
 import {
@@ -27,24 +28,34 @@ import { NavUser } from "@/components/sidebar/nav-user"
 const data = {
   navMain: [
     {
-      title: "Dashboard",
+      title: "Emergency Requests",
       url: "/",
-      icon: ChartColumnStacked ,
+      icon: Hospital,
     },
     {
-      title: "Campaign",
-      url: "/campaign",
-      icon: FlagTriangleRight ,
-    },
-    {
-      title: "User Management",
+      title: "Donations",
       url: "/donation",
+      icon: Cross,
+    },
+    {
+      title: "Donors Register",
+      url: "/donorregister",
+      icon: UsersIcon,
+    },
+    {
+      title: "Recipient Register",
+      url: "/recipientregister",
       icon: UsersIcon,
     },
     {
       title: "Blood Stock",
-      url: "/donation",
-      icon: Cross,
+      url: "/bloodstock",
+      icon: Warehouse,
+    },
+    {
+      title: "Blog List",
+      url: "/bloglist",
+      icon: Newspaper,
     },
   ],
   navClouds: [
@@ -115,7 +126,7 @@ function NavMain({ items }: { items: typeof data.navMain }) {
   )
 }
 
-export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+export function StaffAppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
     <Sidebar collapsible="offcanvas" {...props}>
       <SidebarHeader>

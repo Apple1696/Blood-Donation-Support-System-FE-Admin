@@ -1,15 +1,12 @@
 import { createBrowserRouter } from 'react-router-dom'
-import StaffLayout from '@/layouts/StaffLayout' // Main layout for staff pages
 import LoginPage from '@/pages/Login' // Login page
 import { SignedOut, RedirectToSignIn, SignedIn } from "@clerk/clerk-react"
-import BloodStock from '@/pages/staff/dashboard/BloodStock'
-import EmergencyRequest from './pages/staff/EmergencyRequest'
-import Donation from './pages/staff/Donation'
-import CampaignList from './pages/staff/CampaignList'
-import StaffProfile from './pages/staff/StaffProfile'
-import DonorRegister from './pages/staff/DonorRegister'
-import RecipientRegister from './pages/staff/RecipientRegister'
-import BlogList from './pages/staff/BlogList'
+import Dashboard from '@/pages/admin/dashboard/Dashboard'
+import CampaignList from './pages/admin/CampaignList'
+import UserList from './pages/admin/UserList'
+import BloodStock from './pages/admin/BloodStock'
+import AdminLayout from './layouts/AdminLayout'
+import AdminProfile from './pages/admin/AdminProfile'
 
 export const router = createBrowserRouter([
   {
@@ -17,7 +14,7 @@ export const router = createBrowserRouter([
     element: (
       <>
         <SignedIn>
-          <StaffLayout />
+          <AdminLayout />
         </SignedIn>
         <SignedOut>
           <RedirectToSignIn />
@@ -27,36 +24,24 @@ export const router = createBrowserRouter([
     children: [
       {
         index: true,
-        element: <EmergencyRequest />
+        element: <Dashboard />
       },
       {
         path: 'campaign',
         element: <CampaignList/>
       },
       {
+        path: 'userlist',
+        element: <UserList/>
+      },
+      {
         path: 'bloodstock',
         element: <BloodStock />
       },
       {
-        path: 'donation',
-        element: <Donation />
-      },
-      {
-        path: 'donorregister',
-        element: <DonorRegister />
-      },
-      {
-        path: 'recipientRegister',
-        element: <RecipientRegister />
-      },
-      {
-        path: 'bloglist',
-        element: <BlogList />
-      },
-      {
-        path: 'staffprofile',
-        element: <StaffProfile />
-      },
+        path: 'adminprofile',
+        element: <AdminProfile />
+      },   
     ]
   },
   {

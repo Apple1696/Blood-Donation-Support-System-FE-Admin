@@ -1,63 +1,127 @@
-interface Campaign {
+import api from '../config/api';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+
+export interface Campaign {
+  id: string;
   name: string;
-  description?: string;
-  startDate: string;
-  endDate?: string;
+  description: string;
   status: string;
+  startDate: string;
+  endDate: string;
+  createdAt: string;
+  updatedAt: string;
   banner: string;
 }
 
-class CampaignService {
-  private baseUrl: string = 'https://api-dev.bloodlink.site';
-
-  async createCampaign(campaign: Campaign): Promise<any> {
-    const response = await fetch(`${this.baseUrl}/campaigns`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(campaign),
-    });
-    return response.json();
-  }
-
-  async getCampaigns(search?: string, status?: string, limit?: number, page?: number): Promise<any> {
-    const params = new URLSearchParams();
-    if (search) params.append('search', search);
-    if (status) params.append('status', status);
-    if (limit) params.append('limit', limit.toString());
-    if (page) params.append('page', page.toString());
-
-    const response = await fetch(`${this.baseUrl}/campaigns?${params.toString()}`, {
-      method: 'GET',
-    });
-    return response.json();
-  }
-
-  async getCampaignById(id: string): Promise<any> {
-    const response = await fetch(`${this.baseUrl}/campaigns/${id}`, {
-      method: 'GET',
-    });
-    return response.json();
-  }
-
-  async updateCampaign(id: string, campaign: Partial<Campaign>): Promise<any> {
-    const response = await fetch(`${this.baseUrl}/campaigns/${id}`, {
-      method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(campaign),
-    });
-    return response.json();
-  }
-
-  async deleteCampaign(id: string): Promise<any> {
-    const response = await fetch(`${this.baseUrl}/campaigns/${id}`, {
-      method: 'DELETE',
-    });
-    return response.json();
-  }
+export interface PaginationMeta {
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+  hasNextPage: boolean;
+  hasPreviousPage: boolean;
 }
 
-export default new CampaignService();
+export interface CampaignResponse {
+  success: boolean;
+  message: string;
+  data: {
+    data: Campaign[];
+    meta: PaginationMeta;
+  };
+}
+
+export interface CreateCampaignPayload {
+  name: string;
+  description?: string;
+  status: string;
+  startDate: string;
+  endDate?: string;
+  banner: string;
+}
+
+export interface ApiResponse<T> {
+  success: boolean;
+  message: string;
+  data: T;
+}
+
+// Read (Get Campaigns)
+export const getCampaigns = async (page: number = 1, limit: number = 10): Promise<CampaignResponse> => {
+  const response = await api.get<CampaignResponse>('/campaigns', {
+    params: { page, limit },
+  });
+  return response.data;
+};
+
+export const useGetCampaigns = (page: number = 1, limit: number = 10) => {
+  return useQuery({
+    queryKey: ['campaigns', page, limit],
+    queryFn: () => getCampaigns(page, limit),
+  });
+};
+
+// Read (Get Campaign by ID)
+export const getCampaignById = async (id: string): Promise<ApiResponse<Campaign>> => {
+  const response = await api.get<ApiResponse<Campaign>>(`/campaigns/${id}`);
+  return response.data;
+};
+
+export const useGetCampaignById = (id: string) => {
+  return useQuery({
+    queryKey: ['campaign', id],
+    queryFn: () => getCampaignById(id),
+    enabled: !!id,
+  });
+};
+
+// Create
+export const createCampaign = async (payload: CreateCampaignPayload): Promise<ApiResponse<Campaign>> => {
+  const response = await api.post<ApiResponse<Campaign>>('/campaigns', payload);
+  return response.data;
+};
+
+export const useCreateCampaign = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: createCampaign,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['campaigns'] });
+    },
+  });
+};
+
+// Update
+export const updateCampaign = async (id: string, payload: Partial<CreateCampaignPayload>): Promise<ApiResponse<Campaign>> => {
+  const response = await api.patch<ApiResponse<Campaign>>(`/campaigns/${id}`, payload);
+  return response.data;
+};
+
+export const useUpdateCampaign = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (variables: { id: string; payload: Partial<CreateCampaignPayload> }) =>
+      updateCampaign(variables.id, variables.payload),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['campaigns'] });
+      queryClient.invalidateQueries({ queryKey: ['campaign', variables.id] });
+
+    },
+  });
+};
+
+// Delete
+export const deleteCampaign = async (id: string): Promise<ApiResponse<void>> => {
+  const response = await api.delete<ApiResponse<void>>(`/campaigns/${id}`);
+  return response.data;
+};
+
+export const useDeleteCampaign = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: deleteCampaign,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['campaigns'] });
+    },
+  });
+};
