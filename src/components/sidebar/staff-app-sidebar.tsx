@@ -23,7 +23,7 @@ import {
 } from "@/components/ui/sidebar"
 
 // Assuming NavUser is a component you have defined elsewhere
-import { NavUser } from "@/components/sidebar/nav-user"
+import { StaffNavUser } from "./staff-nav-user"
 
 const data = {
   navMain: [
@@ -148,7 +148,7 @@ export function StaffAppSidebar({ ...props }: React.ComponentProps<typeof Sideba
         <NavMain items={data.navMain} />
       </SidebarContent>
       <SidebarFooter>
-        <NavUser />
+        <StaffNavUser />
       </SidebarFooter>
     </Sidebar>
   )

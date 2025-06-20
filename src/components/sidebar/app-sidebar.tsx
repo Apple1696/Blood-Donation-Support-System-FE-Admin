@@ -28,22 +28,22 @@ const data = {
   navMain: [
     {
       title: "Dashboard",
-      url: "/",
+      url: "/admin",
       icon: ChartColumnStacked ,
     },
     {
       title: "Campaign",
-      url: "/campaign",
+      url: "/admin/campaign",
       icon: FlagTriangleRight ,
     },
     {
       title: "User Management",
-      url: "/donation",
+      url: "/admin/userlist",
       icon: UsersIcon,
     },
     {
       title: "Blood Stock",
-      url: "/donation",
+      url: "/admin/bloodstock",
       icon: Cross,
     },
   ],

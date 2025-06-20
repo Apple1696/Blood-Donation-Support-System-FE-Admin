@@ -29,7 +29,7 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar"
 
-export function NavUser() {
+export function StaffNavUser() {
   const { user } = useUser();
   const { signOut } = useClerk();
   const navigate = useNavigate();
@@ -45,7 +45,7 @@ export function NavUser() {
   };
 
   const handleViewProfile = () => {
-    navigate("/admin/adminprofile"); // Redirect to staff profile page
+    navigate("/staff/staffprofile"); // Redirect to staff profile page
   };
 
   return (

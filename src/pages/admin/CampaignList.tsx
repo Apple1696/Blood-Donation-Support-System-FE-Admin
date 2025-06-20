@@ -64,6 +64,8 @@ interface Campaign {
   endDate?: string
   status: string
   banner: string
+  location: string
+  limitDonation: number
 }
 
 const columns: ColumnDef<Campaign>[] = [
@@ -121,6 +123,14 @@ const columns: ColumnDef<Campaign>[] = [
         View Banner
       </a>
     ),
+  },
+  {
+    accessorKey: "location",
+    header: "Location",
+  },
+  {
+    accessorKey: "limitDonation",
+    header: "Limit Donation",
   },
   {
     id: "actions",

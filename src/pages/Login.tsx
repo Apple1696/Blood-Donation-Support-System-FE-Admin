@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { HeartPlus } from "lucide-react";
 import { LoginForm } from "@/components/login-form";
+import { Toaster } from "sonner";
 
 export default function LoginPage() {
   const [, setIsSignup] = useState(false);
@@ -34,6 +35,7 @@ export default function LoginPage() {
           <LoginForm onSwitchToSignup={() => setIsSignup(true)} />
         </div>
       </div>
+      <Toaster position="top-right" richColors />
     </div>
   );
 }

@@ -11,6 +11,8 @@ export interface Campaign {
   createdAt: string;
   updatedAt: string;
   banner: string;
+  location: string;
+  limitDonation: number;
 }
 
 export interface PaginationMeta {
@@ -38,6 +40,8 @@ export interface CreateCampaignPayload {
   startDate: string;
   endDate?: string;
   banner: string;
+  location: string;
+  limitDonation: number;
 }
 
 export interface ApiResponse<T> {
@@ -124,4 +128,4 @@ export const useDeleteCampaign = () => {
       queryClient.invalidateQueries({ queryKey: ['campaigns'] });
     },
   });
-};
+}

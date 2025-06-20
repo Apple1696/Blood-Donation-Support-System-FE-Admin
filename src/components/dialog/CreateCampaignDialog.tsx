@@ -29,6 +29,8 @@ const formSchema = z.object({
   startDate: z.string().min(1, "Start date is required"),
   endDate: z.string().optional(),
   banner: z.string().url("Invalid URL format"),
+  location: z.string().min(1, "Location is required"),
+  limitDonation: z.number().min(1, "Limit donation must be at least 1"),
 })
 
 interface CreateCampaignDialogProps {
@@ -45,6 +47,8 @@ export function CreateCampaignDialog({ open, onOpenChange }: CreateCampaignDialo
       startDate: new Date().toISOString().split('T')[0],
       endDate: "",
       banner: "",
+      location: "",
+      limitDonation: 0,
     },
   })
 
@@ -128,6 +132,32 @@ export function CreateCampaignDialog({ open, onOpenChange }: CreateCampaignDialo
                   <FormLabel>Banner URL</FormLabel>
                   <FormControl>
                     <Input {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="location"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Location</FormLabel>
+                  <FormControl>
+                    <Input {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="limitDonation"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Limit Donation</FormLabel>
+                  <FormControl>
+                    <Input type="number" {...field} onChange={e => field.onChange(parseInt(e.target.value))} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
