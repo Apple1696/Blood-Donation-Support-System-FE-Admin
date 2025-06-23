@@ -20,6 +20,7 @@ import {
   PlusIcon,
   TrashIcon,
   PencilIcon,
+  EyeIcon,
 } from "lucide-react"
 import { Toaster } from "@/components/ui/sonner"
 import { toast } from "sonner"
@@ -55,6 +56,7 @@ import {
 } from "../../services/campaign"
 import { CreateCampaignDialog } from "../../components/dialog/CreateCampaignDialog"
 import { EditCampaignDialog } from "../../components/dialog/EditCampaignDialog"
+import { ViewCampaignDetail } from "../../components/dialog/ViewCampaignDetail"
 
 interface Campaign {
   id: string
@@ -146,6 +148,7 @@ interface CampaignActionsProps {
 function CampaignActions({ campaign }: CampaignActionsProps) {
   const [showDeleteDialog, setShowDeleteDialog] = React.useState(false)
   const [showEditDialog, setShowEditDialog] = React.useState(false)
+  const [showViewDialog, setShowViewDialog] = React.useState(false)
   const deleteMutation = useDeleteCampaign()
 
   const handleDelete = async () => {
@@ -169,6 +172,10 @@ function CampaignActions({ campaign }: CampaignActionsProps) {
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
+          <DropdownMenuItem onClick={() => setShowViewDialog(true)}>
+            <EyeIcon className="h-4 w-4 mr-2" />
+            View Details
+          </DropdownMenuItem>
           <DropdownMenuItem onClick={() => setShowEditDialog(true)}>
             <PencilIcon className="h-4 w-4 mr-2" />
             Edit
@@ -179,6 +186,11 @@ function CampaignActions({ campaign }: CampaignActionsProps) {
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
+      <ViewCampaignDetail
+        open={showViewDialog}
+        onOpenChange={setShowViewDialog}
+        campaignId={campaign.id}
+      />
       <EditCampaignDialog
         open={showEditDialog}
         onOpenChange={setShowEditDialog}

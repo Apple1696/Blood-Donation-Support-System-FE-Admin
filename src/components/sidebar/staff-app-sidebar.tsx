@@ -9,7 +9,7 @@ import {
   Cross,
   FileCodeIcon,
   FileTextIcon,
-  Hospital,
+  FlagTriangleRight,
   UsersIcon,
 } from "lucide-react"
 import {
@@ -28,33 +28,28 @@ import { StaffNavUser } from "./staff-nav-user"
 const data = {
   navMain: [
     {
-      title: "Emergency Requests",
-      url: "/",
-      icon: Hospital,
+      title: "Blood Unit Update",
+      url: "/staff",
+      icon: FlagTriangleRight,
     },
     {
       title: "Donations",
-      url: "/donation",
+      url: "/staff/donation",
       icon: Cross,
     },
     {
-      title: "Donors Register",
-      url: "/donorregister",
+      title: "Blood Unit Management",
+      url: "/staff/bloodunitmanagement",
       icon: UsersIcon,
     },
     {
-      title: "Recipient Register",
-      url: "/recipientregister",
-      icon: UsersIcon,
-    },
-    {
-      title: "Blood Stock",
-      url: "/bloodstock",
+      title: "Blood Unit History",
+      url: "/staff/bloodunithistory",
       icon: Warehouse,
     },
     {
       title: "Blog List",
-      url: "/bloglist",
+      url: "/staff/bloglist",
       icon: Newspaper,
     },
   ],

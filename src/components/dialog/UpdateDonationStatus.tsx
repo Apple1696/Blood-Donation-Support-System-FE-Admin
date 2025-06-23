@@ -1,6 +1,7 @@
 "use client"
 
 import { useForm } from "react-hook-form"
+import { useEffect } from "react"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
 import { Button } from "@/components/ui/button"
@@ -18,49 +19,70 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form"
-import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { toast } from "sonner"
-import DonationService from "@/services/donations"
+import { useGetDonationRequestById, useUpdateDonationStatus } from "@/services/donations"
 
-interface UpdateStatusDialogProps {
+interface UpdateDonationRequestDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   donationId: string
 }
 
 const formSchema = z.object({
-  status: z.enum(["pending", "completed", "failed"], { required_error: "Status is required" }),
+  status: z.enum(["completed", "rejected"], { required_error: "Status is required" }),
   appointmentDate: z.string().optional(),
   note: z.string().optional(),
 })
 
-export default function UpdateStatusDialog({ open, onOpenChange, donationId }: UpdateStatusDialogProps) {
+export default function UpdateDonationRequestDialog({
+  open,
+  onOpenChange,
+  donationId,
+}: UpdateDonationRequestDialogProps) {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      status: "pending",
+      status: "completed",
       appointmentDate: "",
       note: "",
     },
   })
 
-  const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    try {
-      await DonationService.updateDonationRequestStatus(donationId, values)
-      toast.success("Status updated successfully")
-      onOpenChange(false)
-      window.location.reload()
-    } catch (error) {
-      toast.error("Failed to update status")
+  const { data: donationData } = useGetDonationRequestById(donationId)
+  const { mutate } = useUpdateDonationStatus()
+
+  useEffect(() => {
+    if (donationData) {
+      form.reset({
+        status: "completed",
+        appointmentDate: donationData.appointmentDate,
+        note: "",
+      })
     }
+  }, [donationData, form])
+
+  const onSubmit = (values: z.infer<typeof formSchema>) => {
+    mutate(
+      { id: donationId, statusData: values },
+      {
+        onSuccess: () => {
+          toast.success("Status updated successfully")
+          onOpenChange(false)
+          window.location.reload()
+        },
+        onError: () => {
+          toast.error("Failed to update status")
+        },
+      }
+    )
   }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Update Donation Status</DialogTitle>
+          <DialogTitle>Update Donation Request Status</DialogTitle>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -72,28 +94,25 @@ export default function UpdateStatusDialog({ open, onOpenChange, donationId }: U
                   <FormLabel>Status</FormLabel>
                   <FormControl>
                     <select {...field} className="w-full p-2 border rounded">
-                      <option value="pending">Pending</option>
                       <option value="completed">Completed</option>
-                      <option value="failed">Failed</option>
+                      <option value="rejected">Rejected</option>
                     </select>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-            <FormField
-              control={form.control}
-              name="appointmentDate"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Appointment Date</FormLabel>
-                  <FormControl>
-                    <Input type="date" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+
+            {/* Appointment Date - read-only display */}
+            <FormItem>
+              <FormLabel>Appointment Date</FormLabel>
+              <div className="p-2 border rounded bg-gray-100 text-sm">
+                {donationData?.appointmentDate
+                  ? new Date(donationData.appointmentDate).toLocaleDateString()
+                  : "N/A"}
+              </div>
+            </FormItem>
+
             <FormField
               control={form.control}
               name="note"

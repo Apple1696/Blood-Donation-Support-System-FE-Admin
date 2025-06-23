@@ -40,108 +40,134 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import DonationService from "@/services/donations"
-import ViewDonationDialog from "@/components/dialog/ViewDonationDialog"
-import UpdateStatusDialog from "@/components/dialog/UpdateStatusDialog"
+import { useGetDonationRequests } from "@/services/donations"
+import ViewDonationDetail from "@/components/dialog/ViewDonationDetail"
+import UpdateDonationStatus from "@/components/dialog/UpdateDonationStatus"
+import { type DonationRequest } from "@/services/donations"
+import { Badge } from "@/components/ui/badge"
 
-interface Donor {
-  id: string
-  firstName: string
-  lastName: string
-}
-
-interface Campaign {
-  id: string
-  name: string
-}
-
-interface Donation {
-  id: string
-  donor: Donor
-  campaign: Campaign
-  amount: number
-  note: string
-  appointmentDate: string
-  currentStatus: string
-  createdAt: string
-  updatedAt: string
-}
-
-const columns: ColumnDef<Donation>[] = [
-  {
-    accessorKey: "id",
-    header: "ID",
-  },
-  {
-    accessorKey: "campaign.id",
-    header: "Campaign ID",
-    cell: ({ row }) => row.original.campaign.id,
-  },
-  {
-    accessorKey: "donor.id",
-    header: "Donor ID",
-    cell: ({ row }) => row.original.donor.id,
-  },
-  {
-    accessorKey: "currentStatus",
-    header: "Status",
-  },
-  {
-    accessorKey: "note",
-    header: "Result ID", // Note: 'result_id' is not in DonationRequest, using 'note' as a placeholder
-    cell: ({ row }) => row.original.note || "N/A",
-  },
-  {
-    accessorKey: "createdAt",
-    header: "Created At",
-    cell: ({ row }) => new Date(row.getValue("createdAt")).toLocaleDateString(),
-  },
-  {
-    accessorKey: "updatedAt",
-    header: "Updated At",
-    cell: ({ row }) => new Date(row.getValue("updatedAt")).toLocaleDateString(),
-  },
-  {
-    id: "actions",
-    header: "Actions",
-    cell: ({ row }) => {
-      const [openView, setOpenView] = React.useState(false)
-      const [openUpdate, setOpenUpdate] = React.useState(false)
-      return (
-        <>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="h-8 w-8 p-0">
-                <MoreVerticalIcon className="h-4 w-4" />
-                <span className="sr-only">Open menu</span>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => setOpenView(true)}>
-                View Details
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setOpenUpdate(true)}>
-                Update Status
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-          <ViewDonationDialog
-            open={openView}
-            onOpenChange={setOpenView}
-            donationId={row.original.id}
-          />
-          <UpdateStatusDialog
-            open={openUpdate}
-            onOpenChange={setOpenUpdate}
-            donationId={row.original.id}
-          />
-        </>
-      )
+const getColumns = (meta?: {
+  onView?: (id: string) => void
+  onUpdate?: (id: string, date: string) => void
+}): ColumnDef<DonationRequest>[] => [
+    {
+      accessorKey: "campaign.name",
+      header: "Campaign",
+      cell: ({ row }) => row.original.campaign.name,
     },
-  },
-]
+    {
+      accessorKey: "donor.firstName",
+      header: "Donor First Name",
+      cell: ({ row }) => row.original.donor.firstName,
+    },
+    {
+      accessorKey: "donor.lastName",
+      header: "Donor Last Name",
+      cell: ({ row }) => row.original.donor.lastName,
+    },
+    {
+      accessorKey: "bloodType",
+      header: "Blood Type",
+      cell: ({ }) => "N/A", // Vì DonationRequest không có bloodType, nên hiện tạm "N/A"
+    },
+    {
+      accessorKey: "currentStatus",
+      header: "Status",
+      cell: ({ row }) => {
+        const status = row.original.currentStatus;
+        const getStatusColor = (status: string) => {
+          switch (status.toLowerCase()) {
+            case "pending":
+              return "bg-yellow-100 text-yellow-700";
+            case "completed":
+              return "bg-green-100 text-green-700";
+            case "rejected":
+              return "bg-red-100 text-red-700";
+            default:
+              return "bg-gray-100 text-gray-700";
+          }
+        };
+        return (
+          <Badge className={getStatusColor(status)}>
+            {status.charAt(0).toUpperCase() + status.slice(1)}
+          </Badge>
+        );
+      },
+    },
+    {
+      accessorKey: "appointmentDate",
+      header: "Appointment Date",
+      cell: ({ row }) =>
+        row.original.appointmentDate
+          ? new Date(row.original.appointmentDate).toLocaleDateString()
+          : "N/A",
+    },
+    {
+      accessorKey: "createdAt",
+      header: "Created At",
+      cell: ({ row }) =>
+        new Date(row.original.createdAt).toLocaleDateString(),
+    },
+    {
+      id: "actions",
+      header: "Actions",
+      cell: ({ row }) => {
+        const [openView, setOpenView] = React.useState(false)
+        const [openUpdate, setOpenUpdate] = React.useState(false)
+        const donation = row.original
 
-export function DonationTable() {
+        return (
+          <>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="h-8 w-8 p-0">
+                  <MoreVerticalIcon className="h-4 w-4" />
+                  <span className="sr-only">Open menu</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem
+                  onClick={() => {
+                    setOpenView(true)
+                    meta?.onView?.(donation.id)
+                  }}
+                >
+                  View Details
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => {
+                    setOpenUpdate(true)
+                    meta?.onUpdate?.(donation.id, donation.appointmentDate)
+                  }}
+                >
+                  Update Status
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+            <ViewDonationDetail
+              open={openView}
+              onOpenChange={setOpenView}
+              donationId={donation.id}
+            />
+            <UpdateDonationStatus
+              open={openUpdate}
+              onOpenChange={setOpenUpdate}
+              donationId={donation.id}
+            />
+          </>
+        )
+      },
+    },
+  ]
+
+
+export function DonationTable({
+  onView,
+  onUpdate,
+}: {
+  onView?: (id: string) => void
+  onUpdate?: (id: string, date: string) => void
+}) {
   const [sorting, setSorting] = React.useState<SortingState>([])
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
@@ -149,26 +175,12 @@ export function DonationTable() {
     pageIndex: 0,
     pageSize: 10,
   })
-  const [data, setData] = React.useState<Donation[]>([])
-  const [loading, setLoading] = React.useState(true)
 
-  React.useEffect(() => {
-    async function fetchData() {
-      try {
-        const result = await DonationService.getDonationRequests()
-        setData(result.data)
-      } catch (error) {
-        console.error("Failed to fetch donation requests:", error)
-      } finally {
-        setLoading(false)
-      }
-    }
-    fetchData()
-  }, [])
+  const { data, isLoading, error } = useGetDonationRequests()
 
-  const table = useReactTable({
-    data,
-    columns,
+  const table = useReactTable<DonationRequest>({
+    data: data || [],
+    columns: getColumns({ onView, onUpdate }),
     state: {
       sorting,
       columnFilters,
@@ -184,9 +196,12 @@ export function DonationTable() {
     getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getRowId: (row) => row.id,
+    manualPagination: true,
+    pageCount: Math.ceil((data?.length || 0) / pagination.pageSize),
   })
 
-  if (loading) return <div>Loading...</div>
+  if (isLoading) return <div>Loading...</div>
+  if (error || !data) return <div>Error: {error?.message || "Failed to load donation requests"}</div>
 
   return (
     <div className="w-full p-4">
@@ -226,7 +241,7 @@ export function DonationTable() {
               </SortableContext>
             ) : (
               <TableRow>
-                <TableCell colSpan={columns.length} className="h-24 text-center">
+                <TableCell colSpan={table.getVisibleLeafColumns().length} className="h-24 text-center">
                   No donation requests found.
                 </TableCell>
               </TableRow>

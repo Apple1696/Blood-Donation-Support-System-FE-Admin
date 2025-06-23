@@ -12,10 +12,11 @@ import AdminProfile from './pages/admin/AdminProfile'
 import StaffLayout from './layouts/StaffLayout'
 import BlogList from '@/pages/staff/BlogList'
 import Donation from '@/pages/staff/Donation'
-import DonorRegister from '@/pages/staff/DonorRegister'
-import EmergencyRequest from '@/pages/staff/EmergencyRequest'
-import RecipientRegister from '@/pages/staff/RecipientRegister'
+import BloodUnitManagement from '@/pages/staff/BloodUnitManagement'
+import StaffCampaignList from '@/pages/staff/StaffCampaignList'
 import StaffProfile from './pages/staff/StaffProfile'
+import BloodUnitHistory from './pages/staff/BloodUnitHistory'
+import DonationRequestList from './pages/staff/DonationRequestList'
 
 export const router = createBrowserRouter([
   {
@@ -73,23 +74,27 @@ export const router = createBrowserRouter([
     children: [
       {
         index: true,
-        element: <EmergencyRequest />
+        element: <StaffCampaignList />
       },
       {
         path: 'donation',
         element: <Donation />
       },
       {
+        path: 'campaign/:id/donation-requests',
+        element: <DonationRequestList />
+      },
+      {
         path: 'bloglist',
         element: <BlogList />
       },
       {
-        path: 'donorregister',
-        element: <DonorRegister />
+        path: 'bloodunitmanagement',
+        element: <BloodUnitManagement />
       },
       {
-        path: 'recipientregister',
-        element: <RecipientRegister />
+        path: 'bloodunithistory',
+        element: <BloodUnitHistory />
       },
       {
         path: 'staffprofile',

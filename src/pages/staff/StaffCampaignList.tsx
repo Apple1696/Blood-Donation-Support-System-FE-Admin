@@ -1,7 +1,6 @@
 "use client"
 
 import * as React from "react"
-import { useNavigate } from "react-router-dom"
 import {
   type ColumnDef,
   type SortingState,
@@ -18,13 +17,10 @@ import {
   ChevronsLeftIcon,
   ChevronsRightIcon,
   MoreVerticalIcon,
-  PlusIcon,
-  EyeIcon,
-  TrashIcon,
 } from "lucide-react"
 import { Toaster } from "@/components/ui/sonner"
-import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -39,17 +35,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+import { useNavigate } from "react-router-dom"
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog"
-import campaignService from "../services/campaign"
+  useGetCampaigns,
+} from "../../services/campaign"
 
 interface Campaign {
   id: string
@@ -59,13 +48,11 @@ interface Campaign {
   endDate?: string
   status: string
   banner: string
+  location: string
+  limitDonation: number
 }
 
 const columns: ColumnDef<Campaign>[] = [
-  {
-    accessorKey: "id",
-    header: "ID",
-  },
   {
     accessorKey: "name",
     header: "Name",
@@ -87,6 +74,30 @@ const columns: ColumnDef<Campaign>[] = [
   {
     accessorKey: "status",
     header: "Status",
+    cell: ({ row }) => {
+      const status = row.getValue("status") as string
+
+      const getStatusColor = (status: string) => {
+        switch (status.toLowerCase()) {
+          case "active":
+            return "bg-green-100 text-green-700"
+          case "inactive":
+            return "bg-yellow-100 text-yellow-700"
+          case "completed":
+            return "bg-blue-100 text-blue-700"
+          case "cancelled":
+            return "bg-red-100 text-red-700"
+          default:
+            return "bg-gray-100 text-gray-700"
+        }
+      }
+
+      return (
+        <Badge className={getStatusColor(status)}>
+          {status}
+        </Badge>
+      )
+    },
   },
   {
     accessorKey: "banner",
@@ -98,69 +109,45 @@ const columns: ColumnDef<Campaign>[] = [
     ),
   },
   {
+    accessorKey: "location",
+    header: "Location",
+  },
+  {
+    accessorKey: "limitDonation",
+    header: "Limit Donation",
+  },
+  {
     id: "actions",
     header: "Actions",
     cell: ({ row }) => <CampaignActions campaign={row.original} />,
   },
 ]
 
-interface CampaignTableProps {
-  data: Campaign[]
+interface CampaignActionsProps {
+  campaign: Campaign
 }
 
-function CampaignActions({ campaign }: { campaign: Campaign }) {
-  const navigate = useNavigate()
-  const [showDeleteDialog, setShowDeleteDialog] = React.useState(false)
-
-  const handleDelete = async () => {
-    try {
-      await campaignService.deleteCampaign(campaign.id)
-      toast.success("Campaign deleted successfully")
-      window.location.reload()
-    } catch (error) {
-      toast.error("Failed to delete campaign")
-    }
-  }
+function CampaignActions({ campaign }: CampaignActionsProps) {
+  const navigate = useNavigate();
 
   return (
-    <>
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="ghost" className="h-8 w-8 p-0">
-            <MoreVerticalIcon className="h-4 w-4" />
-            <span className="sr-only">Open menu</span>
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
-          <DropdownMenuItem onClick={() => navigate(`/campaigns/${campaign.id}`)}>
-            <EyeIcon className="h-4 w-4 mr-2" />
-            View Details
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => setShowDeleteDialog(true)}>
-            <TrashIcon className="h-4 w-4 mr-2" />
-            Delete
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
-      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete the campaign "{campaign.name}".
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDelete}>Delete</AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-    </>
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost" className="h-8 w-8 p-0">
+          <MoreVerticalIcon className="h-4 w-4" />
+          <span className="sr-only">Open menu</span>
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end">
+        <DropdownMenuItem onClick={() => navigate(`/staff/campaign/${campaign.id}/donation-requests`)}>
+          View Donation Requests
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   )
 }
 
-export function CampaignTable({ data }: CampaignTableProps) {
+export default function StaffCampaignList() {
   const [sorting, setSorting] = React.useState<SortingState>([])
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
   const [pagination, setPagination] = React.useState({
@@ -168,8 +155,13 @@ export function CampaignTable({ data }: CampaignTableProps) {
     pageSize: 10,
   })
 
+  const { data, isLoading, error } = useGetCampaigns(
+    Number(pagination.pageIndex) + 1,
+    Number(pagination.pageSize)
+  )
+
   const table = useReactTable({
-    data,
+    data: data?.data.data || [],
     columns,
     state: {
       sorting,
@@ -183,16 +175,22 @@ export function CampaignTable({ data }: CampaignTableProps) {
     getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getRowId: (row) => row.id,
+    manualPagination: true,
+    pageCount: data?.data.meta.totalPages,
   })
+
+  if (isLoading) {
+    return <div>Loading...</div>
+  }
+
+  if (error) {
+    return <div>Error: {error.message}</div>
+  }
 
   return (
     <div className="w-full p-4">
       <div className="flex justify-between items-center mb-4">
-        <h1 className="text-2xl font-bold">Campaign Management</h1>
-        <Button onClick={() => window.location.href = "/campaigns/new"}>
-          <PlusIcon className="h-4 w-4 mr-2" />
-          Create New
-        </Button>
+        <h1 className="text-2xl font-bold">View Campaign for Update Blood Unit</h1>
       </div>
       <div className="rounded-md border">
         <Table>

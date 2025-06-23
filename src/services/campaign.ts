@@ -15,6 +15,27 @@ export interface Campaign {
   limitDonation: number;
 }
 
+export interface Donor {
+  id: string;
+  firstName: string;
+  lastName: string;
+}
+
+export interface DonationRequest {
+  id: string;
+  donor: Donor;
+  campaign: {
+    id: string;
+    name: string;
+  };
+  amount: number;
+  note: string;
+  appointmentDate: string;
+  currentStatus: 'pending' | 'completed' | 'failed';
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface PaginationMeta {
   page: number;
   limit: number;
@@ -22,6 +43,15 @@ export interface PaginationMeta {
   totalPages: number;
   hasNextPage: boolean;
   hasPreviousPage: boolean;
+}
+
+export interface DonationRequestResponse {
+  success: boolean;
+  message: string;
+  data: {
+    data: DonationRequest[];
+    meta: PaginationMeta;
+  };
 }
 
 export interface CampaignResponse {
@@ -79,6 +109,25 @@ export const useGetCampaignById = (id: string) => {
   });
 };
 
+// Read (Get Donation Requests for a Campaign)
+export const getDonationRequests = async (id: string, status?: string, limit: number = 10, page: number = 1): Promise<DonationRequestResponse> => {
+  const params: { limit: number; page: number; status?: string } = { limit, page };
+  if (status) params.status = status;
+
+  const response = await api.get<DonationRequestResponse>(`/campaigns/${id}/donation-requests`, {
+    params,
+  });
+  return response.data;
+};
+
+export const useGetDonationRequests = (id: string, status?: string, limit: number = 10, page: number = 1) => {
+  return useQuery({
+    queryKey: ['donationRequests', id, status, page, limit],
+    queryFn: () => getDonationRequests(id, status, limit, page),
+    enabled: !!id,
+  });
+};
+
 // Create
 export const createCampaign = async (payload: CreateCampaignPayload): Promise<ApiResponse<Campaign>> => {
   const response = await api.post<ApiResponse<Campaign>>('/campaigns', payload);
@@ -109,7 +158,6 @@ export const useUpdateCampaign = () => {
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['campaigns'] });
       queryClient.invalidateQueries({ queryKey: ['campaign', variables.id] });
-
     },
   });
 };

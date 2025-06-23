@@ -1,78 +1,103 @@
-interface Donor {
-  id: string;
-  firstName: string;
-  lastName: string;
-}
+import api from '../config/api';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
-interface Campaign {
+export interface DonationRequest {
   id: string;
-  name: string;
-}
-
-interface DonationRequest {
-  id: string;
-  donor: Donor;
-  campaign: Campaign;
-  amount: number;
-  note: string;
-  appointmentDate: string;
-  currentStatus: string;
   createdAt: string;
   updatedAt: string;
+  campaign: {
+    id: string;
+    name: string;
+    status: string;
+    description?: string;
+    startDate?: string;
+    endDate?: string;
+    banner?: string;
+    location?: string;
+    limitDonation?: number;
+  };
+  donor: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    bloodType?: {
+      group: string;
+      rh: string;
+    };
+    phone?: string;
+    wardName?: string;
+    districtName?: string;
+    provinceName?: string;
+  };
+  currentStatus: string;
+  appointmentDate: string;
 }
 
-interface Meta {
-  page: number;
-  limit: number;
-  total: number;
-  totalPages: number;
-  hasNextPage: boolean;
-  hasPreviousPage: boolean;
-}
 
-interface DonationResponse {
-  data: DonationRequest[];
-  meta: Meta;
-}
-
-interface UpdateStatusRequest {
+export interface UpdateStatusRequest {
   status: string;
   appointmentDate?: string;
   note?: string;
 }
 
-class DonationService {
-  private baseUrl: string = 'https://api-dev.bloodlink.site';
-
-  async getDonationRequests(status?: string): Promise<DonationResponse> {
-    const params = new URLSearchParams();
-    if (status) params.append('status', status);
-
-    const response = await fetch(`${this.baseUrl}/donations/requests?${params.toString()}`, {
-      method: 'GET',
-    });
-    if (!response.ok) throw new Error('Failed to fetch donation requests');
-    return response.json();
-  }
-
-  async getDonationRequestById(id: string): Promise<DonationRequest> {
-    const response = await fetch(`${this.baseUrl}/donations/requests/${id}`, {
-      method: 'GET',
-    });
-    if (!response.ok) throw new Error('Failed to fetch donation request');
-    return response.json();
-  }
-
-  async updateDonationRequestStatus(id: string, body: UpdateStatusRequest): Promise<void> {
-    const response = await fetch(`${this.baseUrl}/donations/requests/${id}/status`, {
-      method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(body),
-    });
-    if (!response.ok) throw new Error('Failed to update donation request status');
-  }
+export interface ApiResponse<T> {
+  success: boolean;
+  message: string;
+  data: T;
 }
 
-export default new DonationService();
+export interface PaginatedDonationResponse {
+  items: DonationRequest[];
+  total: number;
+}
+
+export const useGetDonationRequests = (status?: string) => {
+  return useQuery<DonationRequest[], Error>({
+    queryKey: ['donationRequests', status],
+    queryFn: async () => {
+      const { data }: { data: ApiResponse<PaginatedDonationResponse> } = await api.get(
+        '/donations/requests',
+        {
+          params: status ? { status } : {},
+        }
+      );
+      return data.data.items;
+    },
+  });
+};
+
+export const useGetDonationRequestById = (id: string) => {
+  return useQuery<DonationRequest, Error>({
+    queryKey: ['donationRequest', id],
+    queryFn: async () => {
+      const { data }: { data: ApiResponse<DonationRequest> } = await api.get(
+        `/donations/requests/${id}`
+      );
+      return data.data;
+    },
+    enabled: !!id,
+  });
+};
+
+export const useUpdateDonationStatus = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      id,
+      statusData,
+    }: {
+      id: string;
+      statusData: UpdateStatusRequest;
+    }) => {
+      const { data }: { data: ApiResponse<DonationRequest> } = await api.patch(
+        `/donations/requests/${id}/status`,
+        statusData
+      );
+      return data.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['donationRequests'] });
+    },
+  });
+};
