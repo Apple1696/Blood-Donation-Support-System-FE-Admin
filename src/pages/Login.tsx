@@ -1,12 +1,28 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { HeartPlus } from "lucide-react";
 import { LoginForm } from "@/components/login-form";
 import { Toaster } from "sonner";
+import { useAuth } from "@clerk/clerk-react";
+import { useNavigate } from "react-router-dom";
 
 export default function LoginPage() {
-  const [, setIsSignup] = useState(false);
+  const { isLoaded, isSignedIn } = useAuth();
+  const navigate = useNavigate();
+  const [shouldRender, setShouldRender] = useState(false);
+
+  useEffect(() => {
+    if (!isLoaded) return; // Chờ Clerk load xong
+
+    if (isSignedIn) {
+      navigate("/", { replace: true }); // Nếu đã đăng nhập thì redirect về homepage
+    } else {
+      setShouldRender(true); // Cho phép render login page nếu chưa đăng nhập
+    }
+  }, [isLoaded, isSignedIn, navigate]);
+
+  if (!shouldRender) return null;
 
   return (
     <div className="relative min-h-screen flex items-center justify-center">
@@ -32,7 +48,7 @@ export default function LoginPage() {
 
         {/* Form Container */}
         <div className="w-full bg-white/90 backdrop-blur-md rounded-lg shadow-xl p-8">
-          <LoginForm onSwitchToSignup={() => setIsSignup(true)} />
+          <LoginForm onSwitchToSignup={() => {}} />
         </div>
       </div>
       <Toaster position="top-right" richColors />
