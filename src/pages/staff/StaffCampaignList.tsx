@@ -55,25 +55,25 @@ interface Campaign {
 const columns: ColumnDef<Campaign>[] = [
   {
     accessorKey: "name",
-    header: "Name",
+    header: "Tên chiến dịch",
   },
   {
     accessorKey: "description",
-    header: "Description",
+    header: "Mô tả",
   },
   {
     accessorKey: "startDate",
-    header: "Start Date",
-    cell: ({ row }) => new Date(row.getValue("startDate")).toLocaleDateString(),
+    header: "Ngày bắt đầu",
+    cell: ({ row }) => new Date(row.getValue("startDate")).toLocaleDateString('vi-VN'),
   },
   {
     accessorKey: "endDate",
-    header: "End Date",
-    cell: ({ row }) => row.getValue("endDate") ? new Date(row.getValue("endDate")).toLocaleDateString() : "N/A",
+    header: "Ngày kết thúc",
+    cell: ({ row }) => row.getValue("endDate") ? new Date(row.getValue("endDate")).toLocaleDateString('vi-VN') : "Không có",
   },
   {
     accessorKey: "status",
-    header: "Status",
+    header: "Trạng thái",
     cell: ({ row }) => {
       const status = row.getValue("status") as string
 
@@ -94,7 +94,10 @@ const columns: ColumnDef<Campaign>[] = [
 
       return (
         <Badge className={getStatusColor(status)}>
-          {status}
+          {status === "active" ? "Hoạt động" :
+           status === "inactive" ? "Không hoạt động" :
+           status === "completed" ? "Hoàn thành" :
+           status === "cancelled" ? "Đã hủy" : status}
         </Badge>
       )
     },
@@ -104,21 +107,21 @@ const columns: ColumnDef<Campaign>[] = [
     header: "Banner",
     cell: ({ row }) => (
       <a href={row.getValue("banner")} target="_blank" rel="noopener noreferrer">
-        View Banner
+        Xem Banner
       </a>
     ),
   },
   {
     accessorKey: "location",
-    header: "Location",
+    header: "Địa điểm",
   },
   {
     accessorKey: "limitDonation",
-    header: "Limit Donation",
+    header: "Giới hạn quyên góp",
   },
   {
     id: "actions",
-    header: "Actions",
+    header: "Hành động",
     cell: ({ row }) => <CampaignActions campaign={row.original} />,
   },
 ]
@@ -128,19 +131,19 @@ interface CampaignActionsProps {
 }
 
 function CampaignActions({ campaign }: CampaignActionsProps) {
-  const navigate = useNavigate();
+  const navigate = useNavigate()
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="h-8 w-8 p-0">
           <MoreVerticalIcon className="h-4 w-4" />
-          <span className="sr-only">Open menu</span>
+          <span className="sr-only">Mở menu</span>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         <DropdownMenuItem onClick={() => navigate(`/staff/campaign/${campaign.id}/donation-requests`)}>
-          View Donation Requests
+          Xem yêu cầu hiến máu
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
@@ -180,17 +183,17 @@ export default function StaffCampaignList() {
   })
 
   if (isLoading) {
-    return <div>Loading...</div>
+    return <div>Đang tải...</div>
   }
 
   if (error) {
-    return <div>Error: {error.message}</div>
+    return <div>Lỗi: {error.message}</div>
   }
 
   return (
     <div className="w-full p-4">
       <div className="flex justify-between items-center mb-4">
-        <h1 className="text-2xl font-bold">View Campaign for Update Blood Unit</h1>
+        <h1 className="text-2xl font-bold">Xem chiến dịch để cập nhật đơn vị máu</h1>
       </div>
       <div className="rounded-md border">
         <Table>
@@ -221,7 +224,7 @@ export default function StaffCampaignList() {
             ) : (
               <TableRow>
                 <TableCell colSpan={columns.length} className="h-24 text-center">
-                  No campaigns found.
+                  Không tìm thấy chiến dịch nào.
                 </TableCell>
               </TableRow>
             )}
@@ -230,7 +233,7 @@ export default function StaffCampaignList() {
       </div>
       <div className="flex items-center justify-end space-x-2 py-4">
         <div className="flex-1 text-sm text-muted-foreground">
-          Page {table.getState().pagination.pageIndex + 1} of{' '}
+          Trang {table.getState().pagination.pageIndex + 1} /{' '}
           {table.getPageCount()}
         </div>
         <div className="space-x-2">

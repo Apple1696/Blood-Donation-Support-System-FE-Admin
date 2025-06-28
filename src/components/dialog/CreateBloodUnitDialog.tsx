@@ -22,12 +22,12 @@ import { useCreateBloodUnit } from "../../services/inventory"
 import { toast } from "sonner"
 
 const formSchema = z.object({
-  bloodGroup: z.string().min(1, { message: "Blood group is required" }),
-  bloodRh: z.string().min(1, { message: "Blood Rh is required" }),
-  bloodVolume: z.number().min(1, { message: "Blood volume must be greater than 0" }),
-  remainingVolume: z.number().min(0, { message: "Remaining volume must be at least 0" }),
-  expiredDate: z.string().min(1, { message: "Expired date is required" }),
-  status: z.enum(["available", "used", "expired", "damaged"], { required_error: "Status is required" }),
+  bloodGroup: z.string().min(1, { message: "Nhóm máu là bắt buộc" }),
+  bloodRh: z.string().min(1, { message: "Rh máu là bắt buộc" }),
+  bloodVolume: z.number().min(1, { message: "Dung tích máu phải lớn hơn 0" }),
+  remainingVolume: z.number().min(0, { message: "Dung tích còn lại phải ít nhất là 0" }),
+  expiredDate: z.string().min(1, { message: "Ngày hết hạn là bắt buộc" }),
+  status: z.enum(["available", "used", "expired", "damaged"], { required_error: "Trạng thái là bắt buộc" }),
 });
 
 interface CreateBloodUnitDialogProps {
@@ -65,12 +65,12 @@ export default function CreateBloodUnitDialog({ open, onOpenChange, memberId, me
       },
       {
         onSuccess: () => {
-          toast.success("Blood unit created successfully");
+          toast.success("Tạo đơn vị máu thành công");
           onOpenChange(false);
           form.reset();
         },
         onError: () => {
-          toast.error("Failed to create blood unit");
+          toast.error("Tạo đơn vị máu thất bại");
         },
       }
     );
@@ -80,7 +80,7 @@ export default function CreateBloodUnitDialog({ open, onOpenChange, memberId, me
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Create New Blood Unit</DialogTitle>
+          <DialogTitle>Tạo đơn vị máu mới</DialogTitle>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -89,7 +89,7 @@ export default function CreateBloodUnitDialog({ open, onOpenChange, memberId, me
               name="bloodGroup"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Blood Group</FormLabel>
+                  <FormLabel>Nhóm máu</FormLabel>
                   <FormControl>
                     <input {...field} className="w-full p-2 border rounded" />
                   </FormControl>
@@ -102,7 +102,7 @@ export default function CreateBloodUnitDialog({ open, onOpenChange, memberId, me
               name="bloodRh"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Blood Rh</FormLabel>
+                  <FormLabel>Rh máu</FormLabel>
                   <FormControl>
                     <input {...field} className="w-full p-2 border rounded" />
                   </FormControl>
@@ -115,7 +115,7 @@ export default function CreateBloodUnitDialog({ open, onOpenChange, memberId, me
               name="bloodVolume"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Blood Volume (ml)</FormLabel>
+                  <FormLabel>Dung tích máu (ml)</FormLabel>
                   <FormControl>
                     <input
                       type="number"
@@ -133,7 +133,7 @@ export default function CreateBloodUnitDialog({ open, onOpenChange, memberId, me
               name="remainingVolume"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Remaining Volume (ml)</FormLabel>
+                  <FormLabel>Dung tích còn lại (ml)</FormLabel>
                   <FormControl>
                     <input
                       type="number"
@@ -151,7 +151,7 @@ export default function CreateBloodUnitDialog({ open, onOpenChange, memberId, me
               name="expiredDate"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Expired Date</FormLabel>
+                  <FormLabel>Ngày hết hạn</FormLabel>
                   <FormControl>
                     <input type="date" {...field} className="w-full p-2 border rounded" />
                   </FormControl>
@@ -164,13 +164,13 @@ export default function CreateBloodUnitDialog({ open, onOpenChange, memberId, me
               name="status"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Status</FormLabel>
+                  <FormLabel>Trạng thái</FormLabel>
                   <FormControl>
                     <select {...field} className="w-full p-2 border rounded">
-                      <option value="available">Available</option>
-                      <option value="used">Used</option>
-                      <option value="expired">Expired</option>
-                      <option value="damaged">Damaged</option>
+                      <option value="available">Có sẵn</option>
+                      <option value="used">Đã sử dụng</option>
+                      <option value="expired">Hết hạn</option>
+                      <option value="damaged">Hư hỏng</option>
                     </select>
                   </FormControl>
                   <FormMessage />
@@ -178,12 +178,12 @@ export default function CreateBloodUnitDialog({ open, onOpenChange, memberId, me
               )}
             />
             <FormItem>
-              <FormLabel>Member</FormLabel>
+              <FormLabel>Thành viên</FormLabel>
               <div className="p-2 border rounded bg-gray-100 text-sm">
                 {memberName} (ID: {memberId})
               </div>
             </FormItem>
-            <Button type="submit">Create Blood Unit</Button>
+            <Button type="submit">Tạo đơn vị máu</Button>
           </form>
         </Form>
       </DialogContent>

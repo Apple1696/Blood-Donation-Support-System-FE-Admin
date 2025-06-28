@@ -8,7 +8,7 @@ import {
   FlagTriangleRight,
   FileCodeIcon,
   FileTextIcon,
-  ChartColumnStacked ,
+  ChartColumnStacked,
   UsersIcon,
 } from "lucide-react"
 import {
@@ -21,7 +21,7 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
 
-// Assuming NavUser is a component you have defined elsewhere
+// Giả sử NavUser là một thành phần được định nghĩa ở nơi khác
 import { NavUser } from "@/components/sidebar/nav-user"
 
 const data = {
@@ -29,67 +29,62 @@ const data = {
     {
       title: "Dashboard",
       url: "/admin",
-      icon: ChartColumnStacked ,
+      icon: ChartColumnStacked,
     },
     {
-      title: "Campaign",
+      title: "Chiến dịch",
       url: "/admin/campaign",
-      icon: FlagTriangleRight ,
+      icon: FlagTriangleRight,
     },
     {
-      title: "User Management",
+      title: "Quản lý người dùng",
       url: "/admin/userlist",
       icon: UsersIcon,
-    },
-    {
-      title: "Blood Stock",
-      url: "/admin/bloodstock",
-      icon: Cross,
-    },
+    }
   ],
   navClouds: [
     {
-      title: "Capture",
+      title: "Chụp ảnh",
       icon: CameraIcon,
       isActive: true,
       url: "/capture",
       items: [
         {
-          title: "Active Proposals",
+          title: "Đề xuất đang hoạt động",
           url: "/capture/active-proposals",
         },
         {
-          title: "Archived",
+          title: "Đã lưu trữ",
           url: "/capture/archived",
         },
       ],
     },
     {
-      title: "Proposal",
+      title: "Đề xuất",
       icon: FileTextIcon,
       url: "/proposal",
       items: [
         {
-          title: "Active Proposals",
+          title: "Đề xuất đang hoạt động",
           url: "/proposal/active-proposals",
         },
         {
-          title: "Archived",
+          title: "Đã lưu trữ",
           url: "/proposal/archived",
         },
       ],
     },
     {
-      title: "Prompts",
+      title: "Gợi ý",
       icon: FileCodeIcon,
       url: "/prompts",
       items: [
         {
-          title: "Active Proposals",
+          title: "Đề xuất đang hoạt động",
           url: "/prompts/active-proposals",
         },
         {
-          title: "Archived",
+          title: "Đã lưu trữ",
           url: "/prompts/archived",
         },
       ],
@@ -97,7 +92,7 @@ const data = {
   ],
 }
 
-// New NavMain component to handle navigation
+// Thành phần NavMain mới để xử lý điều hướng
 function NavMain({ items }: { items: typeof data.navMain }) {
   return (
     <SidebarMenu>

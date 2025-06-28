@@ -19,6 +19,7 @@ import {
 } from "lucide-react"
 import { Toaster } from "@/components/ui/sonner"
 import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
 import {
   Table,
   TableBody,
@@ -27,95 +28,95 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { useGetBloodUnitActions } from "../../services/inventory";
-import type { BloodUnitAction } from "../../services/inventory";
-import { ViewBloodUnitActionDialog } from "@/components/dialog/ViewBloodUnitActionDialog";
-import { Badge } from "@/components/ui/badge";
+import { useGetBloodUnitActions } from "../../services/inventory"
+import type { BloodUnitAction } from "../../services/inventory"
+import { ViewBloodUnitActionDialog } from "@/components/dialog/ViewBloodUnitActionDialog"
 
 export default function BloodUnitHistory() {
-  const [sorting, setSorting] = React.useState<SortingState>([]);
-  const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({});
+  const [sorting, setSorting] = React.useState<SortingState>([])
+  const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
   const [pagination, setPagination] = React.useState({
     pageIndex: 0,
     pageSize: 10,
-  });
-  const [dialogActionId, setDialogActionId] = React.useState<string | null>(null);
+  })
+  const [dialogActionId, setDialogActionId] = React.useState<string | null>(null)
 
-  const columns: ColumnDef<BloodUnitAction, any>[] = [   
+  const columns: ColumnDef<BloodUnitAction, any>[] = [
     {
       id: "staffName",
-      header: "Staff Name",
+      header: "Tên nhân viên",
       accessorFn: row => `${row.staff.firstName} ${row.staff.lastName}`,
       cell: ({ getValue }) => getValue(),
     },
     {
       id: "description",
-      header: "Description",
+      header: "Mô tả",
       accessorFn: row => row.description,
       cell: ({ getValue }) => getValue(),
     },
     {
       id: "bloodGroup",
-      header: "Blood Group",
+      header: "Nhóm máu",
       accessorFn: row => row.bloodUnit.bloodType.group,
       cell: ({ getValue }) => getValue(),
     },
     {
       id: "bloodRh",
-      header: "Blood Rh",
+      header: "Rh máu",
       accessorFn: row => row.bloodUnit.bloodType.rh,
       cell: ({ getValue }) => getValue(),
     },
     {
       id: "remainingVolume",
-      header: "Remaining Volume",
+      header: "Dung tích còn lại",
       accessorFn: row => row.bloodUnit.remainingVolume,
       cell: ({ getValue }) => getValue(),
     },
     {
       id: "action",
-      header: "Action",
+      header: "Hành động",
       accessorFn: row => row.action,
       cell: ({ getValue }) => {
-        const action = getValue() as string;
+        const action = getValue() as string
         const getActionColor = (action: string) => {
           switch (action) {
             case "status_update":
-              return "bg-blue-100 text-blue-700";
+              return "bg-blue-100 text-blue-700"
             case "volume_change":
-              return "bg-purple-100 text-purple-700";
+              return "bg-purple-100 text-purple-700"
             default:
-              return "bg-gray-100 text-gray-700";
+              return "bg-gray-100 text-gray-700"
           }
-        };
+        }
         return (
           <Badge className={getActionColor(action)}>
-            {action === "status_update" ? "Status Update" : action === "volume_change" ? "Volume Change" : action}
+            {action === "status_update" ? "Cập nhật trạng thái" :
+             action === "volume_change" ? "Thay đổi dung tích" : action}
           </Badge>
-        );
+        )
       },
     },
     {
       id: "createdAt",
-      header: "Created At",
+      header: "Ngày tạo",
       accessorFn: row => row.createdAt,
-      cell: ({ getValue }) => new Date(getValue() as string).toLocaleDateString(),
+      cell: ({ getValue }) => new Date(getValue() as string).toLocaleDateString('vi-VN'),
     },
     {
       id: "actions",
-      header: "Actions",
+      header: "Hành động",
       cell: ({ row }) => (
         <Button variant="outline" size="sm" onClick={() => setDialogActionId(row.original.id)}>
-          View Details
+          Xem chi tiết
         </Button>
       ),
     },
-  ];
+  ]
 
   const { data, isLoading, error } = useGetBloodUnitActions(
     Number(pagination.pageIndex) + 1,
     Number(pagination.pageSize)
-  );
+  )
 
   const table = useReactTable({
     data: data?.data.data || [],
@@ -134,20 +135,20 @@ export default function BloodUnitHistory() {
     getRowId: (row) => row.id,
     manualPagination: true,
     pageCount: data?.data.meta.totalPages,
-  });
+  })
 
   if (isLoading) {
-    return <div>Loading...</div>;
+    return <div>Đang tải...</div>
   }
 
   if (error) {
-    return <div>Error: {error.message}</div>;
+    return <div>Lỗi: {error.message}</div>
   }
 
   return (
     <div className="w-full p-4">
       <div className="flex justify-between items-center mb-4">
-        <h1 className="text-2xl font-bold">Blood Unit History</h1>
+        <h1 className="text-2xl font-bold">Lịch sử đơn vị máu</h1>
       </div>
       <div className="rounded-md border">
         <Table>
@@ -178,7 +179,7 @@ export default function BloodUnitHistory() {
             ) : (
               <TableRow>
                 <TableCell colSpan={columns.length} className="h-24 text-center">
-                  No history found.
+                  Không tìm thấy lịch sử.
                 </TableCell>
               </TableRow>
             )}
@@ -187,7 +188,7 @@ export default function BloodUnitHistory() {
       </div>
       <div className="flex items-center justify-end space-x-2 py-4">
         <div className="flex-1 text-sm text-muted-foreground">
-          Page {table.getState().pagination.pageIndex + 1} of{' '}
+          Trang {table.getState().pagination.pageIndex + 1} /{' '}
           {table.getPageCount()}
         </div>
         <div className="space-x-2">
@@ -234,5 +235,5 @@ export default function BloodUnitHistory() {
         />
       )}
     </div>
-  );
+  )
 }

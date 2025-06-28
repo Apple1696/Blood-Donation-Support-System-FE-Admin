@@ -53,45 +53,39 @@ import {
 import {
   useGetCampaigns,
   useDeleteCampaign,
+  type Campaign,
 } from "../../services/campaign"
 import { CreateCampaignDialog } from "../../components/dialog/CreateCampaignDialog"
 import { EditCampaignDialog } from "../../components/dialog/EditCampaignDialog"
 import { ViewCampaignDetail } from "../../components/dialog/ViewCampaignDetail"
 
-interface Campaign {
-  id: string
-  name: string
-  description?: string
-  startDate: string
-  endDate?: string
-  status: string
-  banner: string
-  location: string
-  limitDonation: number
-}
-
-const columns: ColumnDef<Campaign>[] = [
+const columns: ColumnDef<Campaign, any>[] = [
   {
     accessorKey: "name",
-    header: "Name",
+    header: "Tên chiến dịch",
   },
   {
     accessorKey: "description",
-    header: "Description",
+    header: "Mô tả",
   },
   {
     accessorKey: "startDate",
-    header: "Start Date",
-    cell: ({ row }) => new Date(row.getValue("startDate")).toLocaleDateString(),
+    header: "Ngày bắt đầu",
+    cell: ({ row }) => new Date(row.getValue("startDate")).toLocaleDateString('vi-VN'),
   },
   {
     accessorKey: "endDate",
-    header: "End Date",
-    cell: ({ row }) => row.getValue("endDate") ? new Date(row.getValue("endDate")).toLocaleDateString() : "N/A",
+    header: "Ngày kết thúc",
+    cell: ({ row }) => row.getValue("endDate") ? new Date(row.getValue("endDate")).toLocaleDateString('vi-VN') : "Không có",
+  },
+  {
+    accessorKey: "bloodCollectionDate",
+    header: "Ngày thu thập máu",
+    cell: ({ row }) => row.getValue("bloodCollectionDate") ? new Date(row.getValue("bloodCollectionDate")).toLocaleDateString('vi-VN') : "Không có",
   },
   {
     accessorKey: "status",
-    header: "Status",
+    header: "Trạng thái",
     cell: ({ row }) => {
       const status = row.getValue("status") as string
 
@@ -112,7 +106,10 @@ const columns: ColumnDef<Campaign>[] = [
 
       return (
         <Badge className={getStatusColor(status)}>
-          {status}
+          {status === "active" ? "Hoạt động" :
+           status === "inactive" ? "Không hoạt động" :
+           status === "completed" ? "Hoàn thành" :
+           status === "cancelled" ? "Đã hủy" : status}
         </Badge>
       )
     },
@@ -122,21 +119,21 @@ const columns: ColumnDef<Campaign>[] = [
     header: "Banner",
     cell: ({ row }) => (
       <a href={row.getValue("banner")} target="_blank" rel="noopener noreferrer">
-        View Banner
+        Xem Banner
       </a>
     ),
   },
   {
     accessorKey: "location",
-    header: "Location",
+    header: "Địa điểm",
   },
   {
     accessorKey: "limitDonation",
-    header: "Limit Donation",
+    header: "Giới hạn quyên góp",
   },
   {
     id: "actions",
-    header: "Actions",
+    header: "Hành động",
     cell: ({ row }) => <CampaignActions campaign={row.original} />,
   },
 ]
@@ -154,9 +151,9 @@ function CampaignActions({ campaign }: CampaignActionsProps) {
   const handleDelete = async () => {
     try {
       await deleteMutation.mutateAsync(campaign.id)
-      toast.success("Campaign deleted successfully")
+      toast.success("Xóa chiến dịch thành công")
     } catch (error) {
-      toast.error("Failed to delete campaign")
+      toast.error("Xóa chiến dịch thất bại")
     } finally {
       setShowDeleteDialog(false)
     }
@@ -168,21 +165,21 @@ function CampaignActions({ campaign }: CampaignActionsProps) {
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" className="h-8 w-8 p-0">
             <MoreVerticalIcon className="h-4 w-4" />
-            <span className="sr-only">Open menu</span>
+            <span className="sr-only">Mở menu</span>
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
           <DropdownMenuItem onClick={() => setShowViewDialog(true)}>
             <EyeIcon className="h-4 w-4 mr-2" />
-            View Details
+            Xem chi tiết
           </DropdownMenuItem>
           <DropdownMenuItem onClick={() => setShowEditDialog(true)}>
             <PencilIcon className="h-4 w-4 mr-2" />
-            Edit
+            Chỉnh sửa
           </DropdownMenuItem>
           <DropdownMenuItem onClick={() => setShowDeleteDialog(true)}>
             <TrashIcon className="h-4 w-4 mr-2" />
-            Delete
+            Xóa
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
@@ -199,14 +196,14 @@ function CampaignActions({ campaign }: CampaignActionsProps) {
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogTitle>Bạn có chắc chắn?</AlertDialogTitle>
             <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete the campaign "{campaign.name}".
+              Hành động này không thể hoàn tác. Điều này sẽ xóa vĩnh viễn chiến dịch "{campaign.name}".
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDelete}>Delete</AlertDialogAction>
+            <AlertDialogCancel>Hủy</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete}>Xóa</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
@@ -248,20 +245,20 @@ export default function CampaignList() {
   })
 
   if (isLoading) {
-    return <div>Loading...</div>
+    return <div>Đang tải...</div>
   }
 
   if (error) {
-    return <div>Error: {error.message}</div>
+    return <div>Lỗi: {error.message}</div>
   }
 
   return (
     <div className="w-full p-4">
       <div className="flex justify-between items-center mb-4">
-        <h1 className="text-2xl font-bold">Campaign Management</h1>
+        <h1 className="text-2xl font-bold">Quản lý chiến dịch</h1>
         <Button onClick={() => setShowCreateDialog(true)}>
           <PlusIcon className="h-4 w-4 mr-2" />
-          Create New Campaign
+          Tạo chiến dịch mới
         </Button>
       </div>
       <div className="rounded-md border">
@@ -293,7 +290,7 @@ export default function CampaignList() {
             ) : (
               <TableRow>
                 <TableCell colSpan={columns.length} className="h-24 text-center">
-                  No campaigns found.
+                  Không tìm thấy chiến dịch nào.
                 </TableCell>
               </TableRow>
             )}
@@ -302,7 +299,7 @@ export default function CampaignList() {
       </div>
       <div className="flex items-center justify-end space-x-2 py-4">
         <div className="flex-1 text-sm text-muted-foreground">
-          Page {table.getState().pagination.pageIndex + 1} of{' '}
+          Trang {table.getState().pagination.pageIndex + 1} /{' '}
           {table.getPageCount()}
         </div>
         <div className="space-x-2">

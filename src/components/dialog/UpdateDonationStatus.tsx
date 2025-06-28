@@ -1,5 +1,3 @@
-"use client"
-
 import { useForm } from "react-hook-form"
 import { useEffect } from "react"
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -30,10 +28,20 @@ interface UpdateDonationRequestDialogProps {
 }
 
 const formSchema = z.object({
-  status: z.enum(["completed", "rejected"], { required_error: "Status is required" }),
+  status: z.enum(["pending", "rejected", "completed", "result_returned", "appointment_confirmed", "appointment_cancelled", "appointment_absent"], { required_error: "Trạng thái là bắt buộc" }),
   appointmentDate: z.string().optional(),
   note: z.string().optional(),
 })
+
+const VALID_STATUSES = [
+  "pending",
+  "rejected",
+  "completed",
+  "result_returned",
+  "appointment_confirmed",
+  "appointment_cancelled",
+  "appointment_absent",
+] as const;
 
 export default function UpdateDonationRequestDialog({
   open,
@@ -43,7 +51,7 @@ export default function UpdateDonationRequestDialog({
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      status: "completed",
+      status: "pending", // Default to "pending" as initial state
       appointmentDate: "",
       note: "",
     },
@@ -54,9 +62,14 @@ export default function UpdateDonationRequestDialog({
 
   useEffect(() => {
     if (donationData) {
+      const validStatus = VALID_STATUSES.includes(donationData.currentStatus as any)
+        ? donationData.currentStatus
+        : "pending";
       form.reset({
-        status: "completed",
-        appointmentDate: donationData.appointmentDate,
+        status: validStatus as typeof VALID_STATUSES[number],
+        appointmentDate: donationData.appointmentDate
+          ? new Date(donationData.appointmentDate).toISOString()
+          : "",
         note: "",
       })
     }
@@ -67,12 +80,12 @@ export default function UpdateDonationRequestDialog({
       { id: donationId, statusData: values },
       {
         onSuccess: () => {
-          toast.success("Status updated successfully")
+          toast.success("Cập nhật trạng thái thành công")
           onOpenChange(false)
           window.location.reload()
         },
         onError: () => {
-          toast.error("Failed to update status")
+          toast.error("Cập nhật trạng thái thất bại")
         },
       }
     )
@@ -82,7 +95,7 @@ export default function UpdateDonationRequestDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Update Donation Request Status</DialogTitle>
+          <DialogTitle>Cập nhật trạng thái yêu cầu hiến máu</DialogTitle>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -91,11 +104,16 @@ export default function UpdateDonationRequestDialog({
               name="status"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Status</FormLabel>
+                  <FormLabel>Trạng thái</FormLabel>
                   <FormControl>
                     <select {...field} className="w-full p-2 border rounded">
-                      <option value="completed">Completed</option>
-                      <option value="rejected">Rejected</option>
+                      <option value="pending">Request chờ duyệt</option>
+                      <option value="rejected">Request bị từ chối</option>
+                      <option value="completed">Lấy máu thành công, chưa trả kết quả</option>
+                      <option value="result_returned">Đã trả kết quả chính thức</option>
+                      <option value="appointment_confirmed">Xác nhận request</option>
+                      <option value="appointment_cancelled">Hủy lịch hẹn</option>
+                      <option value="appointment_absent">Vắng mặt vào ngày lấy máu</option>
                     </select>
                   </FormControl>
                   <FormMessage />
@@ -103,22 +121,32 @@ export default function UpdateDonationRequestDialog({
               )}
             />
 
-            {/* Appointment Date - read-only display */}
-            <FormItem>
-              <FormLabel>Appointment Date</FormLabel>
-              <div className="p-2 border rounded bg-gray-100 text-sm">
-                {donationData?.appointmentDate
-                  ? new Date(donationData.appointmentDate).toLocaleDateString()
-                  : "N/A"}
-              </div>
-            </FormItem>
+            <FormField
+              control={form.control}
+              name="appointmentDate"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Ngày hẹn (có giờ)</FormLabel>
+                  <FormControl>
+                    <input
+                      type="datetime-local"
+                      {...field}
+                      className="w-full p-2 border rounded"
+                      value={field.value ? new Date(field.value).toISOString().slice(0, 16) : ''}
+                      onChange={(e) => field.onChange(new Date(e.target.value).toISOString())}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
             <FormField
               control={form.control}
               name="note"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Note</FormLabel>
+                  <FormLabel>Ghi chú</FormLabel>
                   <FormControl>
                     <Textarea {...field} />
                   </FormControl>
@@ -126,7 +154,7 @@ export default function UpdateDonationRequestDialog({
                 </FormItem>
               )}
             />
-            <Button type="submit">Update Status</Button>
+            <Button type="submit">Cập nhật trạng thái</Button>
           </form>
         </Form>
       </DialogContent>

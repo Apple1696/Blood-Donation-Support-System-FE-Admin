@@ -98,13 +98,13 @@ export function NavUser() {
             <DropdownMenuGroup>
               <DropdownMenuItem onClick={handleViewProfile}>
                 <UserCircleIcon className="mr-2 h-4 w-4" />
-                Profile
+                Xem tài khoản
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={handleSignOut}>
               <LogOutIcon className="mr-2 h-4 w-4" />
-              Log out
+              Đăng xuất
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

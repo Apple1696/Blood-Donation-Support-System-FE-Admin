@@ -1,5 +1,3 @@
-"use client"
-
 import {
   Dialog,
   DialogContent,
@@ -22,10 +20,18 @@ export default function ViewDonationDetail({ open, onOpenChange, donationId }: V
     switch (status.toLowerCase()) {
       case "pending":
         return "bg-yellow-100 text-yellow-700"
-      case "completed":
-        return "bg-green-100 text-green-700"
       case "rejected":
         return "bg-red-100 text-red-700"
+      case "completed":
+        return "bg-green-100 text-green-700"
+      case "result_returned":
+        return "bg-blue-100 text-blue-700"
+      case "appointment_confirmed":
+        return "bg-purple-100 text-purple-700"
+      case "appointment_cancelled":
+        return "bg-orange-100 text-orange-700"
+      case "appointment_absent":
+        return "bg-gray-100 text-gray-700"
       default:
         return "bg-gray-100 text-gray-700"
     }
@@ -36,9 +42,9 @@ export default function ViewDonationDetail({ open, onOpenChange, donationId }: V
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="sm:max-w-[600px]">
           <DialogHeader>
-            <DialogTitle>Donation Request Details</DialogTitle>
+            <DialogTitle>Chi tiết yêu cầu hiến máu</DialogTitle>
           </DialogHeader>
-          <div>Loading...</div>
+          <div>Đang tải...</div>
         </DialogContent>
       </Dialog>
     )
@@ -49,9 +55,9 @@ export default function ViewDonationDetail({ open, onOpenChange, donationId }: V
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="sm:max-w-[600px]">
           <DialogHeader>
-            <DialogTitle>Donation Request Details</DialogTitle>
+            <DialogTitle>Chi tiết yêu cầu hiến máu</DialogTitle>
           </DialogHeader>
-          <div>Error: {error?.message || "Failed to load donation request details"}</div>
+          <div>Lỗi: {error?.message || "Không thể tải chi tiết yêu cầu hiến máu"}</div>
         </DialogContent>
       </Dialog>
     )
@@ -63,83 +69,90 @@ export default function ViewDonationDetail({ open, onOpenChange, donationId }: V
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
-          <DialogTitle>Donation Request Details</DialogTitle>
+          <DialogTitle>Chi tiết yêu cầu hiến máu</DialogTitle>
         </DialogHeader>
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-4">
             <div>
-              <label className="text-sm font-medium">Campaign</label>
-              <p className="text-sm text-gray-900">{donation.campaign?.name || "Unknown"}</p>
+              <label className="text-sm font-medium">Chiến dịch</label>
+              <p className="text-sm text-gray-900">{donation.campaign?.name || "Không xác định"}</p>
             </div>
             <div>
-              <label className="text-sm font-medium">Description</label>
-              <p className="text-sm text-gray-900">{donation.campaign?.description || "N/A"}</p>
+              <label className="text-sm font-medium">Mô tả</label>
+              <p className="text-sm text-gray-900">{donation.campaign?.description || "Không có"}</p>
             </div>
             <div>
-              <label className="text-sm font-medium">Start Date</label>
+              <label className="text-sm font-medium">Ngày bắt đầu</label>
               <p className="text-sm text-gray-900">
-                {donation.campaign?.startDate ? new Date(donation.campaign.startDate).toLocaleDateString() : "N/A"}
+                {donation.campaign?.startDate ? new Date(donation.campaign.startDate).toLocaleDateString('vi-VN') : "Không có"}
               </p>
             </div>
             <div>
-              <label className="text-sm font-medium">End Date</label>
+              <label className="text-sm font-medium">Ngày kết thúc</label>
               <p className="text-sm text-gray-900">
-                {donation.campaign?.endDate ? new Date(donation.campaign.endDate).toLocaleDateString() : "N/A"}
+                {donation.campaign?.endDate ? new Date(donation.campaign.endDate).toLocaleDateString('vi-VN') : "Không có"}
               </p>
             </div>
             <div>
-              <label className="text-sm font-medium">Status</label>
+              <label className="text-sm font-medium">Trạng thái</label>
               <p className="text-sm text-gray-900">
-                <Badge className={getStatusColor(donation.currentStatus)}>
-                  {donation.currentStatus}
+                <Badge className={getStatusColor(donation.currentStatus || "pending")}>
+                  {donation.currentStatus === "pending" ? "Request chờ duyệt" :
+                   donation.currentStatus === "rejected" ? "Request bị từ chối" :
+                   donation.currentStatus === "completed" ? "Lấy máu thành công, chưa trả kết quả" :
+                   donation.currentStatus === "result_returned" ? "Đã trả kết quả chính thức" :
+                   donation.currentStatus === "appointment_confirmed" ? "Xác nhận request" :
+                   donation.currentStatus === "appointment_cancelled" ? "Hủy lịch hẹn" :
+                   donation.currentStatus === "appointment_absent" ? "Vắng mặt vào ngày lấy máu" :
+                   donation.currentStatus}
                 </Badge>
               </p>
             </div>
             <div>
-              <label className="text-sm font-medium">Appointment Date</label>
+              <label className="text-sm font-medium">Ngày hẹn</label>
               <p className="text-sm text-gray-900">
-                {donation.appointmentDate ? new Date(donation.appointmentDate).toLocaleDateString() : "N/A"}
+                {donation.appointmentDate ? new Date(donation.appointmentDate).toLocaleDateString('vi-VN') : "Không có"}
               </p>
             </div>
             <div>
-              <label className="text-sm font-medium">Created At</label>
+              <label className="text-sm font-medium">Ngày tạo</label>
               <p className="text-sm text-gray-900">
-                {new Date(donation.createdAt).toLocaleDateString()}
+                {new Date(donation.createdAt).toLocaleDateString('vi-VN')}
               </p>
             </div>
           </div>
           <div className="space-y-4">
             <div>
-              <label className="text-sm font-medium">Donor</label>
+              <label className="text-sm font-medium">Người hiến máu</label>
               <p className="text-sm text-gray-900">
-                {donation.donor?.firstName || "Unknown"} {donation.donor?.lastName || ""}
+                {donation.donor?.firstName || "Không xác định"} {donation.donor?.lastName || ""}
               </p>
             </div>
             <div>
-              <label className="text-sm font-medium">Blood Type</label>
+              <label className="text-sm font-medium">Nhóm máu</label>
               <p className="text-sm text-gray-900">
-                {donation.donor?.bloodType?.group || "N/A"}{donation.donor?.bloodType?.rh || ""}
+                {donation.donor?.bloodType?.group || "Không có"}{donation.donor?.bloodType?.rh || ""}
               </p>
             </div>
             <div>
-              <label className="text-sm font-medium">Phone</label>
-              <p className="text-sm text-gray-900">{donation.donor?.phone || "N/A"}</p>
+              <label className="text-sm font-medium">Số điện thoại</label>
+              <p className="text-sm text-gray-900">{donation.donor?.phone || "Không có"}</p>
             </div>
             <div>
-              <label className="text-sm font-medium">Location</label>
-              <p className="text-sm text-gray-900">{donation.campaign?.location || "N/A"}</p>
+              <label className="text-sm font-medium">Địa điểm</label>
+              <p className="text-sm text-gray-900">{donation.campaign?.location || "Không có"}</p>
             </div>
             <div>
-              <label className="text-sm font-medium">Ward</label>
-              <p className="text-sm text-gray-900">{donation.donor?.wardName || "N/A"}</p>
+              <label className="text-sm font-medium">Phường/Xã</label>
+              <p className="text-sm text-gray-900">{donation.donor?.wardName || "Không có"}</p>
             </div>
             <div>
-              <label className="text-sm font-medium">District</label>
-              <p className="text-sm text-gray-900">{donation.donor?.districtName || "N/A"}</p>
+              <label className="text-sm font-medium">Quận/Huyện</label>
+              <p className="text-sm text-gray-900">{donation.donor?.districtName || "Không có"}</p>
             </div>
             <div>
-              <label className="text-sm font-medium">Province</label>
-              <p className="text-sm text-gray-900">{donation.donor?.provinceName || "N/A"}</p>
+              <label className="text-sm font-medium">Tỉnh/Thành phố</label>
+              <p className="text-sm text-gray-900">{donation.donor?.provinceName || "Không có"}</p>
             </div>
           </div>
         </div>

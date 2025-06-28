@@ -29,7 +29,7 @@ export function ViewBloodUnitActionDialog({ open, onOpenChange, actionId }: View
   const { data: staffProfile } = getCurrentStaffProfile();
 
   const getActionDisplay = (action: string) => {
-    return action === "status_update" ? "Status Update" : "Volume Change";
+    return action === "status_update" ? "Cập nhật trạng thái" : "Thay đổi dung tích";
   };
 
   if (isLoading) {
@@ -37,9 +37,9 @@ export function ViewBloodUnitActionDialog({ open, onOpenChange, actionId }: View
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
-            <DialogTitle>Action Details</DialogTitle>
+            <DialogTitle>Chi tiết hành động</DialogTitle>
           </DialogHeader>
-          <div>Loading...</div>
+          <div>Đang tải...</div>
         </DialogContent>
       </Dialog>
     );
@@ -50,9 +50,9 @@ export function ViewBloodUnitActionDialog({ open, onOpenChange, actionId }: View
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
-            <DialogTitle>Action Details</DialogTitle>
+            <DialogTitle>Chi tiết hành động</DialogTitle>
           </DialogHeader>
-          <div>Error: {error?.message || "Failed to load action details"}</div>
+          <div>Lỗi: {error?.message || "Không thể tải chi tiết hành động"}</div>
         </DialogContent>
       </Dialog>
     );
@@ -64,39 +64,39 @@ export function ViewBloodUnitActionDialog({ open, onOpenChange, actionId }: View
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Action Details</DialogTitle>
+          <DialogTitle>Chi tiết hành động</DialogTitle>
         </DialogHeader>
         <div className="space-y-4">
           <div>
-            <label className="text-sm font-medium">Staff</label>
+            <label className="text-sm font-medium">Nhân viên</label>
             <p className="text-sm text-gray-900">{staffProfile?.firstName || `${action.staff.firstName} ${action.staff.lastName}`}</p>
           </div>
           <div>
-            <label className="text-sm font-medium">Action</label>
+            <label className="text-sm font-medium">Hành động</label>
             <p className="text-sm text-gray-900">{getActionDisplay(action.action)}</p>
           </div>
           <div>
-            <label className="text-sm font-medium">Description</label>
+            <label className="text-sm font-medium">Mô tả</label>
             <p className="text-sm text-gray-900">{action.description}</p>
           </div>
           <div>
-            <label className="text-sm font-medium">Previous Value</label>
+            <label className="text-sm font-medium">Giá trị trước</label>
             <p className="text-sm text-gray-900">{action.previousValue}</p>
           </div>
           <div>
-            <label className="text-sm font-medium">New Value</label>
+            <label className="text-sm font-medium">Giá trị mới</label>
             <p className="text-sm text-gray-900">{action.newValue}</p>
           </div>
           <div>
-            <label className="text-sm font-medium">Created At</label>
+            <label className="text-sm font-medium">Ngày tạo</label>
             <p className="text-sm text-gray-900">
-              {new Date(action.createdAt).toLocaleDateString()}
+              {new Date(action.createdAt).toLocaleDateString('vi-VN')}
             </p>
           </div>
           <div>
-            <label className="text-sm font-medium">Updated At</label>
+            <label className="text-sm font-medium">Ngày cập nhật</label>
             <p className="text-sm text-gray-900">
-              {new Date(action.updatedAt).toLocaleDateString()}
+              {new Date(action.updatedAt).toLocaleDateString('vi-VN')}
             </p>
           </div>
         </div>

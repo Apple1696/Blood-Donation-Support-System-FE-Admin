@@ -49,30 +49,30 @@ import { Badge } from "@/components/ui/badge"
 const getColumns = (meta?: {
   onView?: (id: string) => void
   onUpdate?: (id: string, date: string) => void
-}): ColumnDef<DonationRequest>[] => [
-    {
-      accessorKey: "campaign.name",
-      header: "Campaign",
-      cell: ({ row }) => row.original.campaign.name,
-    },
+}): ColumnDef<DonationRequest>[] => [   
     {
       accessorKey: "donor.firstName",
-      header: "Donor First Name",
+      header: "Tên người hiến",
       cell: ({ row }) => row.original.donor.firstName,
     },
     {
       accessorKey: "donor.lastName",
-      header: "Donor Last Name",
+      header: "Họ người hiến",
       cell: ({ row }) => row.original.donor.lastName,
     },
     {
+      accessorKey: "campaign.name",
+      header: "Chiến dịch",
+      cell: ({ row }) => row.original.campaign.name,
+    },
+    {
       accessorKey: "bloodType",
-      header: "Blood Type",
-      cell: ({ }) => "N/A", // Vì DonationRequest không có bloodType, nên hiện tạm "N/A"
+      header: "Nhóm máu",
+      cell: ({ }) => "Không có", // Vì DonationRequest không có bloodType, nên hiện tạm "Không có"
     },
     {
       accessorKey: "currentStatus",
-      header: "Status",
+      header: "Trạng thái",
       cell: ({ row }) => {
         const status = row.original.currentStatus;
         const getStatusColor = (status: string) => {
@@ -89,28 +89,24 @@ const getColumns = (meta?: {
         };
         return (
           <Badge className={getStatusColor(status)}>
-            {status.charAt(0).toUpperCase() + status.slice(1)}
+            {status === "pending" ? "Request chờ duyệt" :
+              status === "completed" ? "Lấy máu thành công, chưa trả kết quả" :
+                status === "rejected" ? "Request bị từ chối" : status.charAt(0).toUpperCase() + status.slice(1)}
           </Badge>
         );
       },
     },
     {
-      accessorKey: "appointmentDate",
-      header: "Appointment Date",
+      id: "bloodCollectionDate",
+      header: "Ngày hiến máu",
       cell: ({ row }) =>
-        row.original.appointmentDate
-          ? new Date(row.original.appointmentDate).toLocaleDateString()
-          : "N/A",
-    },
-    {
-      accessorKey: "createdAt",
-      header: "Created At",
-      cell: ({ row }) =>
-        new Date(row.original.createdAt).toLocaleDateString(),
+        row.original.campaign.bloodCollectionDate
+          ? new Date(row.original.campaign.bloodCollectionDate).toLocaleDateString('vi-VN')
+          : "Không có",
     },
     {
       id: "actions",
-      header: "Actions",
+      header: "Hành động",
       cell: ({ row }) => {
         const [openView, setOpenView] = React.useState(false)
         const [openUpdate, setOpenUpdate] = React.useState(false)
@@ -122,7 +118,7 @@ const getColumns = (meta?: {
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="h-8 w-8 p-0">
                   <MoreVerticalIcon className="h-4 w-4" />
-                  <span className="sr-only">Open menu</span>
+                  <span className="sr-only">Mở menu</span>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
@@ -132,7 +128,7 @@ const getColumns = (meta?: {
                     meta?.onView?.(donation.id)
                   }}
                 >
-                  View Details
+                  Xem chi tiết
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   onClick={() => {
@@ -140,7 +136,7 @@ const getColumns = (meta?: {
                     meta?.onUpdate?.(donation.id, donation.appointmentDate)
                   }}
                 >
-                  Update Status
+                  Cập nhật trạng thái
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -159,7 +155,6 @@ const getColumns = (meta?: {
       },
     },
   ]
-
 
 export function DonationTable({
   onView,
@@ -200,13 +195,13 @@ export function DonationTable({
     pageCount: Math.ceil((data?.length || 0) / pagination.pageSize),
   })
 
-  if (isLoading) return <div>Loading...</div>
-  if (error || !data) return <div>Error: {error?.message || "Failed to load donation requests"}</div>
+  if (isLoading) return <div>Đang tải...</div>
+  if (error || !data) return <div>Lỗi: {error?.message || "Không thể tải danh sách yêu cầu hiến máu"}</div>
 
   return (
     <div className="w-full p-4">
       <div className="flex justify-between items-center mb-4">
-        <h1 className="text-2xl font-bold">Donation Request Management</h1>
+        <h1 className="text-2xl font-bold">Quản lý yêu cầu hiến máu</h1>
       </div>
       <div className="rounded-md border">
         <Table>
@@ -242,7 +237,7 @@ export function DonationTable({
             ) : (
               <TableRow>
                 <TableCell colSpan={table.getVisibleLeafColumns().length} className="h-24 text-center">
-                  No donation requests found.
+                  Không tìm thấy yêu cầu hiến máu.
                 </TableCell>
               </TableRow>
             )}
@@ -251,7 +246,7 @@ export function DonationTable({
       </div>
       <div className="flex items-center justify-end space-x-2 py-4">
         <div className="flex-1 text-sm text-muted-foreground">
-          Page {table.getState().pagination.pageIndex + 1} of{' '}
+          Trang {table.getState().pagination.pageIndex + 1} /{' '}
           {table.getPageCount()}
         </div>
         <div className="space-x-2">

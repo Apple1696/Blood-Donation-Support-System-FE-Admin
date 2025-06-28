@@ -22,7 +22,7 @@ export function LoginForm({ className, onSwitchToSignup, ...props }: LoginFormPr
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!isLoaded) {
-      toast.error("Authentication service is not ready. Please try again later.");
+      toast.error("Dịch vụ xác thực chưa sẵn sàng. Vui lòng thử lại sau.");
       return;
     }
 
@@ -38,9 +38,9 @@ export function LoginForm({ className, onSwitchToSignup, ...props }: LoginFormPr
 
       if (signInAttempt.status === "complete") {
         await setActive({ session: signInAttempt.createdSessionId });
-        toast.success("Login successful! Redirecting...");
+        toast.success("Đăng nhập thành công! Đang chuyển hướng...");
 
-        // Wait briefly to ensure user data is loaded
+        // Đợi một chút để đảm bảo dữ liệu người dùng được tải
         setTimeout(async () => {
           try {
             const res = await api.get('/staffs/me');
@@ -51,23 +51,23 @@ export function LoginForm({ className, onSwitchToSignup, ...props }: LoginFormPr
             } else if (role === "doctor" || role === "staff") {
               navigate("/staff");
             } else {
-              console.error("Unknown role from API:", role);
-              toast.error("Unknown role. Redirecting to homepage.");
+              console.error("Vai trò không xác định từ API:", role);
+              toast.error("Vai trò không xác định. Chuyển hướng về trang chủ.");
               navigate("/");
             }
           } catch (error) {
-            console.error("Failed to fetch user role:", error);
-            toast.error("Failed to fetch user role. Redirecting to homepage.");
+            console.error("Không thể lấy vai trò người dùng:", error);
+            toast.error("Không thể lấy vai trò người dùng. Chuyển hướng về trang chủ.");
             navigate("/");
           }
         }, 100);
       } else {
-        console.error("Login failed:", signInAttempt);
-        toast.error("Login failed. Please check your credentials.");
+        console.error("Đăng nhập thất bại:", signInAttempt);
+        toast.error("Đăng nhập thất bại. Vui lòng kiểm tra thông tin đăng nhập.");
       }
     } catch (err) {
-      console.error("Error during login:", err);
-      toast.error("An error occurred during login. Please try again.");
+      console.error("Lỗi trong quá trình đăng nhập:", err);
+      toast.error("Đã xảy ra lỗi trong quá trình đăng nhập. Vui lòng thử lại.");
     }
   };
 
@@ -78,7 +78,7 @@ export function LoginForm({ className, onSwitchToSignup, ...props }: LoginFormPr
       {...props}
     >
       <div className="flex flex-col items-center gap-2 text-center">
-        <h1 className="text-2xl font-bold">Connect to BloodLink</h1>
+        <h1 className="text-2xl font-bold">Đăng nhập vào BloodLink</h1>
       </div>
       <div className="grid gap-6">
         <div className="grid gap-2">
@@ -94,7 +94,7 @@ export function LoginForm({ className, onSwitchToSignup, ...props }: LoginFormPr
         </div>
         <div className="grid gap-2">
           <div className="flex items-center">
-            <Label htmlFor="password">Password</Label>
+            <Label htmlFor="password">Mật khẩu</Label>
           </div>
           <Input
             id="password"
@@ -105,7 +105,7 @@ export function LoginForm({ className, onSwitchToSignup, ...props }: LoginFormPr
           />
         </div>
         <Button type="submit" className="w-full bg-red-600 hover:bg-red-700" disabled={!isLoaded}>
-          Login
+          Đăng nhập
         </Button>
       </div>
     </form>

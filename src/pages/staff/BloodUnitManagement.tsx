@@ -32,105 +32,112 @@ import { useGetBloodUnits } from "../../services/inventory"
 import UpdateBloodUnitDialog from "@/components/dialog/UpdateBloodUnitDialog"
 
 interface BloodUnit {
-  id: string;
-  createdAt: string;
-  updatedAt: string;
+  id: string
+  createdAt: string
+  updatedAt: string
   member: {
-    firstName: string;
-    lastName: string;
-    bloodType: { group: string; rh: string } | null;
-  };
-  bloodType: { group: string; rh: string };
-  bloodVolume: number;
-  remainingVolume: number;
-  expiredDate: string;
-  status: string;
+    firstName: string
+    lastName: string
+    bloodType: { group: string; rh: string } | null
+  }
+  bloodType: { group: string; rh: string }
+  bloodVolume: number
+  remainingVolume: number
+  expiredDate: string
+  status: string
 }
 
 export default function BloodUnitList() {
-  const [sorting, setSorting] = React.useState<SortingState>([]);
-  const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({});
+  const [sorting, setSorting] = React.useState<SortingState>([])
+  const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
   const [pagination, setPagination] = React.useState({
     pageIndex: 0,
     pageSize: 10,
-  });
-  const [isDialogOpen, setIsDialogOpen] = React.useState<string | null>(null);
+  })
+  const [isDialogOpen, setIsDialogOpen] = React.useState<string | null>(null)
 
   const columns: ColumnDef<BloodUnit>[] = [
     {
       accessorKey: "member.firstName",
-      header: "Member First Name",
+      header: "Tên thành viên",
       cell: ({ row }) => row.original.member.firstName,
     },
     {
       accessorKey: "member.lastName",
-      header: "Member Last Name",
+      header: "Họ thành viên",
       cell: ({ row }) => row.original.member.lastName,
     },
     {
       accessorKey: "bloodType.group",
-      header: "Blood Group",
+      header: "Nhóm máu",
       cell: ({ row }) => row.original.bloodType.group,
     },
     {
       accessorKey: "bloodType.rh",
-      header: "Blood Rh",
+      header: "Rh máu",
       cell: ({ row }) => row.original.bloodType.rh,
     },
     {
       accessorKey: "bloodVolume",
-      header: "Blood Volume",
+      header: "Dung tích máu",
     },
     {
       accessorKey: "remainingVolume",
-      header: "Remaining Volume",
+      header: "Dung tích còn lại",
     },
     {
       accessorKey: "expiredDate",
-      header: "Expired Date",
-      cell: ({ row }) => new Date(row.getValue("expiredDate")).toLocaleDateString(),
+      header: "Ngày hết hạn",
+      cell: ({ row }) => new Date(row.getValue("expiredDate")).toLocaleDateString('vi-VN'),
     },
     {
       accessorKey: "status",
-      header: "Status",
+      header: "Trạng thái",
       cell: ({ row }) => {
-        const status = row.getValue("status") as string;
+        const status = row.getValue("status") as string
         const getStatusColor = (status: string) => {
           switch (status.toLowerCase()) {
             case "available":
-              return "bg-green-100 text-green-700";
+              return "bg-green-100 text-green-700"
             case "used":
-              return "bg-yellow-100 text-yellow-700";
+              return "bg-yellow-100 text-yellow-700"
             case "expired":
-              return "bg-red-100 text-red-700";
+              return "bg-red-100 text-red-700"
             case "damaged":
-              return "bg-gray-100 text-gray-700";
+              return "bg-gray-100 text-gray-700"
             default:
-              return "bg-gray-100 text-gray-700";
+              return "bg-gray-100 text-gray-700"
           }
-        };
-        return <Badge className={getStatusColor(status)}>{status}</Badge>;
+        }
+        return (
+          <Badge className={getStatusColor(status)}>
+            {status === "available" ? "Có sẵn" :
+             status === "used" ? "Đã sử dụng" :
+             status === "expired" ? "Hết hạn" :
+             status === "damaged" ? "Hư hỏng" : status}
+          </Badge>
+        )
       },
     },
     {
       id: "actions",
-      header: "Actions",
+      header: "Hành động",
       cell: ({ row }) => (
         <Button
           variant="outline"
           size="sm"
           onClick={() => setIsDialogOpen(row.original.id)}
         >
-          Update
+          Cập nhật
         </Button>
       ),
     },
-  ];
+  ]
 
   const { data, isLoading, error } = useGetBloodUnits(
     Number(pagination.pageIndex) + 1,
     Number(pagination.pageSize)
-  );
+  )
 
   const table = useReactTable({
     data: data?.data.data || [],
@@ -149,20 +156,20 @@ export default function BloodUnitList() {
     getRowId: (row) => row.id,
     manualPagination: true,
     pageCount: data?.data.meta.totalPages,
-  });
+  })
 
   if (isLoading) {
-    return <div>Loading...</div>;
+    return <div>Đang tải...</div>
   }
 
   if (error) {
-    return <div>Error: {error.message}</div>;
+    return <div>Lỗi: {error.message}</div>
   }
 
   return (
     <div className="w-full p-4">
       <div className="flex justify-between items-center mb-4">
-        <h1 className="text-2xl font-bold">Blood Unit List</h1>
+        <h1 className="text-2xl font-bold">Danh sách đơn vị máu</h1>
       </div>
       <div className="rounded-md border">
         <Table>
@@ -193,7 +200,7 @@ export default function BloodUnitList() {
             ) : (
               <TableRow>
                 <TableCell colSpan={columns.length} className="h-24 text-center">
-                  No blood units found.
+                  Không tìm thấy đơn vị máu.
                 </TableCell>
               </TableRow>
             )}
@@ -202,7 +209,7 @@ export default function BloodUnitList() {
       </div>
       <div className="flex items-center justify-end space-x-2 py-4">
         <div className="flex-1 text-sm text-muted-foreground">
-          Page {table.getState().pagination.pageIndex + 1} of{' '}
+          Trang {table.getState().pagination.pageIndex + 1} /{' '}
           {table.getPageCount()}
         </div>
         <div className="space-x-2">
@@ -249,5 +256,5 @@ export default function BloodUnitList() {
         />
       )}
     </div>
-  );
+  )
 }

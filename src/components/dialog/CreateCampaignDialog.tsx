@@ -31,17 +31,18 @@ import { toast } from "sonner"
 import { useCreateCampaign } from "../../services/campaign"
 
 const formSchema = z.object({
-  name: z.string().min(1, "Name is required"),
+  name: z.string().min(1, "Tên chiến dịch là bắt buộc"),
   description: z.string().optional(),
-  startDate: z.string().min(1, "Start date is required"),
+  startDate: z.string().min(1, "Ngày bắt đầu là bắt buộc"),
   endDate: z.string().optional(),
-  banner: z.string().url("Invalid URL format"),
-  location: z.string().min(1, "Location is required"),
-  limitDonation: z.number().min(1, "Limit donation must be at least 1"),
+  banner: z.string().url("Định dạng URL không hợp lệ"),
+  location: z.string().min(1, "Địa điểm là bắt buộc"),
+  limitDonation: z.number().min(1, "Giới hạn quyên góp phải ít nhất là 1"),
   status: z.enum(["active", "not_started", "ended"], {
-    errorMap: () => ({ message: "Status must be Active, Not Started, or Ended" }),
+    errorMap: () => ({ message: "Trạng thái phải là Hoạt động, Chưa bắt đầu, hoặc Đã kết thúc" }),
   }),
-})
+  bloodCollectionDate: z.string().min(1, "Ngày thu thập máu là bắt buộc"),
+});
 
 interface CreateCampaignDialogProps {
   open: boolean
@@ -60,18 +61,29 @@ export function CreateCampaignDialog({ open, onOpenChange }: CreateCampaignDialo
       location: "",
       limitDonation: 0,
       status: "active",
+      bloodCollectionDate: "",
     },
   })
 
   const createMutation = useCreateCampaign()
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    // Cross-field validation for bloodCollectionDate
+    const start = new Date(values.startDate);
+    const end = new Date(values.endDate || values.startDate);
+    const bloodDate = new Date(values.bloodCollectionDate);
+    const diffStart = (bloodDate.getTime() - start.getTime()) / (1000 * 60 * 60 * 24);
+    const diffEnd = (bloodDate.getTime() - end.getTime()) / (1000 * 60 * 60 * 24);
+    if (!(diffStart > 7 && diffEnd >= 3)) {
+      toast.error("Ngày thu thập máu phải cách ngày bắt đầu ít nhất 1 tuần và sau ngày kết thúc ít nhất 3 ngày");
+      return;
+    }
     try {
       await createMutation.mutateAsync(values)
-      toast.success("Campaign created successfully")
+      toast.success("Tạo chiến dịch thành công")
       onOpenChange(false)
     } catch (error) {
-      toast.error("Failed to create campaign")
+      toast.error("Tạo chiến dịch thất bại")
     }
   }
 
@@ -79,7 +91,7 @@ export function CreateCampaignDialog({ open, onOpenChange }: CreateCampaignDialo
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Create New Campaign</DialogTitle>
+          <DialogTitle>Tạo chiến dịch mới</DialogTitle>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="grid grid-cols-2 gap-4">
@@ -88,7 +100,7 @@ export function CreateCampaignDialog({ open, onOpenChange }: CreateCampaignDialo
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Name</FormLabel>
+                  <FormLabel>Tên chiến dịch</FormLabel>
                   <FormControl>
                     <Input {...field} />
                   </FormControl>
@@ -101,17 +113,17 @@ export function CreateCampaignDialog({ open, onOpenChange }: CreateCampaignDialo
               name="status"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Status</FormLabel>
+                  <FormLabel>Trạng thái</FormLabel>
                   <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder="Select status" />
+                        <SelectValue placeholder="Chọn trạng thái" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="active">Active</SelectItem>
-                      <SelectItem value="not_started">Not Started</SelectItem>
-                      <SelectItem value="ended">Ended</SelectItem>
+                      <SelectItem value="active">Hoạt động</SelectItem>
+                      <SelectItem value="not_started">Chưa bắt đầu</SelectItem>
+                      <SelectItem value="ended">Đã kết thúc</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage />
@@ -123,7 +135,7 @@ export function CreateCampaignDialog({ open, onOpenChange }: CreateCampaignDialo
               name="description"
               render={({ field }) => (
                 <FormItem className="col-span-2">
-                  <FormLabel>Description</FormLabel>
+                  <FormLabel>Mô tả</FormLabel>
                   <FormControl>
                     <Textarea {...field} />
                   </FormControl>
@@ -136,7 +148,7 @@ export function CreateCampaignDialog({ open, onOpenChange }: CreateCampaignDialo
               name="startDate"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Start Date</FormLabel>
+                  <FormLabel>Ngày bắt đầu</FormLabel>
                   <FormControl>
                     <Input type="date" {...field} />
                   </FormControl>
@@ -149,7 +161,20 @@ export function CreateCampaignDialog({ open, onOpenChange }: CreateCampaignDialo
               name="endDate"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>End Date</FormLabel>
+                  <FormLabel>Ngày kết thúc</FormLabel>
+                  <FormControl>
+                    <Input type="date" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="bloodCollectionDate"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Ngày thu thập máu</FormLabel>
                   <FormControl>
                     <Input type="date" {...field} />
                   </FormControl>
@@ -162,7 +187,7 @@ export function CreateCampaignDialog({ open, onOpenChange }: CreateCampaignDialo
               name="banner"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Banner URL</FormLabel>
+                  <FormLabel>URL Banner</FormLabel>
                   <FormControl>
                     <Input {...field} />
                   </FormControl>
@@ -175,7 +200,7 @@ export function CreateCampaignDialog({ open, onOpenChange }: CreateCampaignDialo
               name="location"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Location</FormLabel>
+                  <FormLabel>Địa điểm</FormLabel>
                   <FormControl>
                     <Input {...field} />
                   </FormControl>
@@ -188,7 +213,7 @@ export function CreateCampaignDialog({ open, onOpenChange }: CreateCampaignDialo
               name="limitDonation"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Limit Donation</FormLabel>
+                  <FormLabel>Giới hạn quyên góp</FormLabel>
                   <FormControl>
                     <Input type="number" {...field} onChange={e => field.onChange(parseInt(e.target.value))} />
                   </FormControl>
@@ -196,7 +221,7 @@ export function CreateCampaignDialog({ open, onOpenChange }: CreateCampaignDialo
                 </FormItem>
               )}
             />
-            <Button type="submit" className="col-span-2">Create Campaign</Button>
+            <Button type="submit" className="col-span-2">Tạo chiến dịch</Button>
           </form>
         </Form>
       </DialogContent>

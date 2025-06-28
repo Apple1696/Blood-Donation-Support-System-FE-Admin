@@ -15,6 +15,19 @@ interface ViewCampaignDetailProps {
   campaignId: string
 }
 
+type Campaign = {
+  id: string
+  name: string
+  description?: string
+  startDate: string
+  endDate?: string
+  status: string
+  banner: string
+  location: string
+  limitDonation: number
+  bloodCollectionDate?: string
+}
+
 export function ViewCampaignDetail({ open, onOpenChange, campaignId }: ViewCampaignDetailProps) {
   const { data, isLoading, error } = useGetCampaignById(campaignId)
 
@@ -59,58 +72,69 @@ export function ViewCampaignDetail({ open, onOpenChange, campaignId }: ViewCampa
     )
   }
 
-  const campaign = data.data
+  // ép kiểu campaign để tránh lỗi
+  const campaign = data.data as Campaign
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
           <DialogTitle>Campaign Details</DialogTitle>
         </DialogHeader>
-        <div className="space-y-4">
-          <div>
-            <label className="text-sm font-medium">Name</label>
-            <p className="text-sm text-gray-900">{campaign.name}</p>
+        <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-4">
+            <div>
+              <label className="text-sm font-medium">Name</label>
+              <p className="text-sm text-gray-900">{campaign.name}</p>
+            </div>
+            <div>
+              <label className="text-sm font-medium">Description</label>
+              <p className="text-sm text-gray-900">{campaign.description || "N/A"}</p>
+            </div>
+            <div>
+              <label className="text-sm font-medium">Status</label>
+              <p className="text-sm text-gray-900">
+                <Badge className={getStatusColor(campaign.status)}>
+                  {campaign.status}
+                </Badge>
+              </p>
+            </div>
+            <div>
+              <label className="text-sm font-medium">Start Date</label>
+              <p className="text-sm text-gray-900">
+                {new Date(campaign.startDate).toLocaleDateString()}
+              </p>
+            </div>
+            <div>
+              <label className="text-sm font-medium">End Date</label>
+              <p className="text-sm text-gray-900">
+                {campaign.endDate ? new Date(campaign.endDate).toLocaleDateString() : "N/A"}
+              </p>
+            </div>
           </div>
-          <div>
-            <label className="text-sm font-medium">Description</label>
-            <p className="text-sm text-gray-900">{campaign.description || "N/A"}</p>
-          </div>
-          <div>
-            <label className="text-sm font-medium">Status</label>
-            <p className="text-sm text-gray-900">
-              <Badge className={getStatusColor(campaign.status)}>
-                {campaign.status}
-              </Badge>
-            </p>
-          </div>
-          <div>
-            <label className="text-sm font-medium">Start Date</label>
-            <p className="text-sm text-gray-900">
-              {new Date(campaign.startDate).toLocaleDateString()}
-            </p>
-          </div>
-          <div>
-            <label className="text-sm font-medium">End Date</label>
-            <p className="text-sm text-gray-900">
-              {campaign.endDate ? new Date(campaign.endDate).toLocaleDateString() : "N/A"}
-            </p>
-          </div>
-          <div>
-            <label className="text-sm font-medium">Banner URL</label>
-            <p className="text-sm text-gray-900">
-              <a href={campaign.banner} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
-                View Banner
-              </a>
-            </p>
-          </div>
-          <div>
-            <label className="text-sm font-medium">Location</label>
-            <p className="text-sm text-gray-900">{campaign.location}</p>
-          </div>
-          <div>
-            <label className="text-sm font-medium">Limit Donation</label>
-            <p className="text-sm text-gray-900">{campaign.limitDonation}</p>
+          <div className="space-y-4">
+            <div>
+              <label className="text-sm font-medium">Blood Collection Date</label>
+              <p className="text-sm text-gray-900">
+                {campaign.bloodCollectionDate ? new Date(campaign.bloodCollectionDate).toLocaleDateString() : "N/A"}
+              </p>
+            </div>
+            <div>
+              <label className="text-sm font-medium">Banner URL</label>
+              <p className="text-sm text-gray-900">
+                <a href={campaign.banner} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
+                  View Banner
+                </a>
+              </p>
+            </div>
+            <div>
+              <label className="text-sm font-medium">Location</label>
+              <p className="text-sm text-gray-900">{campaign.location}</p>
+            </div>
+            <div>
+              <label className="text-sm font-medium">Limit Donation</label>
+              <p className="text-sm text-gray-900">{campaign.limitDonation}</p>
+            </div>
           </div>
         </div>
       </DialogContent>

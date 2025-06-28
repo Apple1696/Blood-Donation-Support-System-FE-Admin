@@ -15,6 +15,7 @@ export interface DonationRequest {
     banner?: string;
     location?: string;
     limitDonation?: number;
+    bloodCollectionDate?: string;
   };
   donor: {
     id: string;

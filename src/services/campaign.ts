@@ -13,6 +13,7 @@ export interface Campaign {
   banner: string;
   location: string;
   limitDonation: number;
+  bloodCollectionDate?: string;
 }
 
 export interface Donor {
