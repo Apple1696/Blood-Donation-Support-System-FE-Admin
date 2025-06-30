@@ -5,12 +5,12 @@ import { Link } from "react-router-dom"
 import {
   CameraIcon,
   Newspaper,
-  FileClock,
+  Warehouse,
   Cross,
   FileCodeIcon,
   FileTextIcon,
-  FlagTriangleRight,
-  Droplet,
+  Hospital,
+  UsersIcon,
 } from "lucide-react"
 import {
   Sidebar,
@@ -22,80 +22,85 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
 
-// Giả sử StaffNavUser là một thành phần được định nghĩa ở nơi khác
-import { StaffNavUser } from "./staff-nav-user"
+// Assuming NavUser is a component you have defined elsewhere
+import { NavUser } from "@/components/nav-user"
 
 const data = {
   navMain: [
     {
-      title: "Hiến máu",
-      url: "/staff/donation",
+      title: "Emergency Requests",
+      url: "/",
+      icon: Hospital,
+    },
+    {
+      title: "Donations",
+      url: "/donation",
       icon: Cross,
     },
     {
-      title: "Cập nhật đơn vị máu",
-      url: "/staff",
-      icon: FlagTriangleRight,
+      title: "Donors Register",
+      url: "#",
+      icon: UsersIcon,
     },
     {
-      title: "Quản lý đơn vị máu",
-      url: "/staff/bloodunitmanagement",
-      icon: Droplet,
+      title: "Recipient Register",
+      url: "#",
+      icon: UsersIcon,
     },
     {
-      title: "Danh sách bài viết",
-      url: "/staff/bloglist",
+      title: "Blood Stock",
+      url: "/bloodstock",
+      icon: Warehouse,
+    },
+    {
+      title: "Blog List",
+      url: "#",
       icon: Newspaper,
     },
-    {
-      title: "Lịch sử đơn vị máu",
-      url: "/staff/bloodunithistory",
-      icon: FileClock,
-    }
   ],
   navClouds: [
     {
-      title: "Chụp ảnh",
+      title: "Capture",
       icon: CameraIcon,
       isActive: true,
       url: "/capture",
       items: [
         {
-          title: "Đề xuất đang hoạt động",
+          title: "Active Proposals",
           url: "/capture/active-proposals",
         },
         {
-          title: "Đã lưu trữ",
+          title: "Archived",
           url: "/capture/archived",
         },
       ],
     },
     {
-      title: "Đề xuất",
+      title: "Proposal",
       icon: FileTextIcon,
       url: "/proposal",
       items: [
         {
-          title: "Đề xuất đang hoạt động",
+          title: "Active Proposals",
           url: "/proposal/active-proposals",
         },
         {
-          title: "Đã lưu trữ",
+          title: "Archived",
           url: "/proposal/archived",
         },
       ],
     },
     {
-      title: "Gợi ý",
+      title: "Prompts",
       icon: FileCodeIcon,
       url: "/prompts",
       items: [
         {
-          title: "Đề xuất đang hoạt động",
+          title: "Active Proposals",
           url: "/prompts/active-proposals",
         },
         {
-          title: "Đã lưu trữ",
+          title: "Archived",
           url: "/prompts/archived",
         },
       ],
@@ -103,7 +108,7 @@ const data = {
   ],
 }
 
-// Thành phần NavMain mới để xử lý điều hướng
+// New NavMain component to handle navigation
 function NavMain({ items }: { items: typeof data.navMain }) {
   return (
     <SidebarMenu>
@@ -121,7 +126,7 @@ function NavMain({ items }: { items: typeof data.navMain }) {
   )
 }
 
-export function StaffAppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
     <Sidebar collapsible="offcanvas" {...props}>
       <SidebarHeader>
@@ -143,7 +148,7 @@ export function StaffAppSidebar({ ...props }: React.ComponentProps<typeof Sideba
         <NavMain items={data.navMain} />
       </SidebarContent>
       <SidebarFooter>
-        <StaffNavUser />
+        <NavUser />
       </SidebarFooter>
     </Sidebar>
   )
