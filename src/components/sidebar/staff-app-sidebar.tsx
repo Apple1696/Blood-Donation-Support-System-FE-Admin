@@ -5,12 +5,12 @@ import { Link } from "react-router-dom"
 import {
   CameraIcon,
   Newspaper,
-  Warehouse,
+  FileClock,
   Cross,
   FileCodeIcon,
   FileTextIcon,
   FlagTriangleRight,
-  UsersIcon,
+  Droplet,
 } from "lucide-react"
 import {
   Sidebar,
@@ -28,30 +28,30 @@ import { StaffNavUser } from "./staff-nav-user"
 const data = {
   navMain: [
     {
-      title: "Cập nhật đơn vị máu",
-      url: "/staff",
-      icon: FlagTriangleRight,
-    },
-    {
       title: "Hiến máu",
       url: "/staff/donation",
       icon: Cross,
     },
     {
-      title: "Quản lý đơn vị máu",
-      url: "/staff/bloodunitmanagement",
-      icon: UsersIcon,
+      title: "Cập nhật đơn vị máu",
+      url: "/staff",
+      icon: FlagTriangleRight,
     },
     {
-      title: "Lịch sử đơn vị máu",
-      url: "/staff/bloodunithistory",
-      icon: Warehouse,
+      title: "Quản lý đơn vị máu",
+      url: "/staff/bloodunitmanagement",
+      icon: Droplet,
     },
     {
       title: "Danh sách bài viết",
       url: "/staff/bloglist",
       icon: Newspaper,
     },
+    {
+      title: "Lịch sử đơn vị máu",
+      url: "/staff/bloodunithistory",
+      icon: FileClock,
+    }
   ],
   navClouds: [
     {
